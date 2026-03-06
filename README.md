@@ -49,7 +49,7 @@ docker-compose up -d
 ### Method 1: Easy Install Script (Interactive)
 ```bash
 # Download and run installer
-curl -fsSL https://raw.githubusercontent.com/dfir/emltriage/main/install.sh | bash
+curl -fsSL https://github.com/Player0xA/AIEML/blob/main/emltriage/install.sh | bash
 
 # The installer will:
 # 1. Check Python version
