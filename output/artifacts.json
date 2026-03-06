@@ -1,0 +1,779 @@
+{
+  "metadata": {
+    "run_id": "541c6f07-5e5e-443d-8449-04442489448f",
+    "timestamp": "2026-03-05 04:07:16.595567+00:00",
+    "tool_name": "emltriage",
+    "tool_version": "0.1.0",
+    "input_filename": "I-332595 - \ud83d\udea8 Mensaje de verificaci\u00f3n de correo.eml",
+    "input_hash_sha256": "653ab39c964da7af3177d828ef6cdd0e31448366351e124722729ecc3c3c006d",
+    "input_size": 212049,
+    "analysis_mode": "triage",
+    "offline_mode": true,
+    "redact_mode": false
+  },
+  "headers": [
+    {
+      "name": "Received",
+      "raw_value": "from LV8PR22MB5315.namprd22.prod.outlook.com (2603:10b6:408:1ca::6) by SA0PR22MB2143.namprd22.prod.outlook.com with HTTPS; Wed, 4 Mar 2026 04:30:44 +0000",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "Received",
+      "raw_value": "from SJ0PR03CA0340.namprd03.prod.outlook.com (2603:10b6:a03:39c::15) by LV8PR22MB5315.namprd22.prod.outlook.com (2603:10b6:408:1ca::6) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9654.20; Wed, 4 Mar 2026 04:30:38 +0000",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "Received",
+      "raw_value": "from SJ5PEPF000001F7.namprd05.prod.outlook.com (2603:10b6:a03:39c:cafe::e3) by SJ0PR03CA0340.outlook.office365.com (2603:10b6:a03:39c::15) with Microsoft SMTP Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.20.9654.22 via Frontend Transport; Wed, 4 Mar 2026 04:30:17 +0000",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "Received",
+      "raw_value": "from BL0PR03CU003.outbound.protection.outlook.com (2a01:111:f403:c101::7) by SJ5PEPF000001F7.mail.protection.outlook.com (2603:10b6:a0f:fc02::14b) with Microsoft SMTP Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.20.9654.16 via Frontend Transport; Wed, 4 Mar 2026 04:30:38 +0000",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "Received",
+      "raw_value": "from SA0PR19MB4411.namprd19.prod.outlook.com (2603:10b6:806:b1::18) by SA0PR19MB4412.namprd19.prod.outlook.com (2603:10b6:806:ba::17) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9654.22; Wed, 4 Mar 2026 04:30:35 +0000",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "Received",
+      "raw_value": "from SA0PR19MB4411.namprd19.prod.outlook.com ([fe80::d690:8cee:d0dd:4e4c]) by SA0PR19MB4411.namprd19.prod.outlook.com ([fe80::d690:8cee:d0dd:4e4c%4]) with mapi id 15.20.9654.022; Wed, 4 Mar 2026 04:30:34 +0000",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "From",
+      "raw_value": "MAGDALENA DE JESUS BARRON CONEJO <m_barronc39@seg-gto.gob.mx>",
+      "decoded_value": null,
+      "parsed": {
+        "addresses": [
+          {
+            "display_name": "MAGDALENA DE JESUS BARRON CONEJO",
+            "address": "m_barronc39@seg-gto.gob.mx",
+            "domain": "seg-gto.gob.mx",
+            "local_part": "m_barronc39"
+          }
+        ]
+      }
+    },
+    {
+      "name": "To",
+      "raw_value": "Administrativo Centro <region.centro@fonacot.gob.mx>",
+      "decoded_value": null,
+      "parsed": {
+        "addresses": [
+          {
+            "display_name": "Administrativo Centro",
+            "address": "region.centro@fonacot.gob.mx",
+            "domain": "fonacot.gob.mx",
+            "local_part": "region.centro"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Subject",
+      "raw_value": "\ud83d\udea8 Mensaje de verificaci\u00f3n de correo",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "Thread-Topic",
+      "raw_value": "\ud83d\udea8 Mensaje de verificaci\u00f3n de correo",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "Thread-Index",
+      "raw_value": "AdyrhMb1wavX1evZSKa5O2eDHg13Xw==",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "X-MS-Exchange-MessageSentRepresentingType",
+      "raw_value": "1",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "Date",
+      "raw_value": "Wed, 04 Mar 2026 04:30:34 +0000",
+      "decoded_value": null,
+      "parsed": {
+        "raw": "Wed, 04 Mar 2026 04:30:34 +0000",
+        "timestamp": "2026-03-04T04:30:34+00:00",
+        "iso": "2026-03-04T04:30:34+00:00"
+      }
+    },
+    {
+      "name": "Message-ID",
+      "raw_value": "<SA0PR19MB4411E817500DBC61127A5670FC7CA@SA0PR19MB4411.namprd19.prod.outlook.com>",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "Accept-Language",
+      "raw_value": "es-ES, en-US",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "Content-Language",
+      "raw_value": "es-ES",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "X-MS-Exchange-Organization-AuthSource",
+      "raw_value": "SJ5PEPF000001F7.namprd05.prod.outlook.com",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "X-MS-Has-Attach",
+      "raw_value": "yes",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "X-Auto-Response-Suppress",
+      "raw_value": "DR, RN, NRN, OOF, AutoReply",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "X-MS-Exchange-Organization-Network-Message-Id",
+      "raw_value": "3e9dc9d9-4aa2-4bdc-a651-08de79a6c959",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "x-ms-publictraffictype",
+      "raw_value": "Email",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "received-spf",
+      "raw_value": "Pass (protection.outlook.com: domain of seg-gto.gob.mx designates 2a01:111:f403:c101::7 as permitted sender) receiver=protection.outlook.com; client-ip=2a01:111:f403:c101::7; helo=BL0PR03CU003.outbound.protection.outlook.com; pr=C",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "dkim-signature",
+      "raw_value": "v=1; a=rsa-sha256; c=relaxed/relaxed; d=seg-gto.gob.mx; s=selector1; h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck; bh=/A2RHXmG+6xrMbaGXROawDJNg1ruIDTZLMCYHEYKP1E=; b=dm8X497gpE5N0Y3P6tGNpZDqCssNhLWDTc/PYl4uJT7jwSz50daJ2wXiTbLzAaCrAcjHZCWHMLq8JiyKcLt9IV6iRy00yc0M1ilsxrjiMp6yup8CmTTsFkGfE08uzpf9wUls0MwJ5v8Up7AK8iD3EHuPlUeyb3x4NsAqqOAlnOs=",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "X-Microsoft-Antispam-Mailbox-Delivery",
+      "raw_value": "ucf:0;jmr:0;auth:0;dest:I;ENG:(910005)(944506478)(944626604)(4710137)(4712097)(4999163)(920097)(930201)(20251009189)(140003);",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "X-Microsoft-Antispam-Message-Info",
+      "raw_value": "bOYjjrkJtld5trrvaAzibZnUsrXqStVPq5WO1k0JerF64tXDOyU33j1DmSXEftcYeDCKSstFiLG7WEuojazCwcILnkyXdk/j4oTmHe99IKxt57sV8CBKTv87DK0nP1XXnEDkpv7DuQCQdlKz10Q/2BKeDoj6eE8zafnlZIUJ8Ag4JRAcDHKX0doKbVy1yeNYTeqBnApqoawV9Lzd4oqsFqDRnS/Nc/wBbtPM6dKfoY+icUFuQebMG9AdQWwkkWMXo/6dzQ3IG2cNsmC05rDAGKuZwxnzHQEZeovXhDJjLrdXMlgdSyilrDqFsZm1YBzwVxnZCcqQdDiyxIZRBWY+a73GMBahDbU0J3sO/zqjW6gaOLqLH/hJMK37LTuULNhPa90HCpZCJJ+tC3eC/GlON0vdjnX7eSq4phrAyFGr2xdf0TdJphsK05/ap5nRaYGEgQV63AZD8KM5dbTenW6Q/Li7pNYJDzLZf8bn6hpjC/gguO/4t4GMU19wC/s6fKVwi8s/SnBv7lpX5gAL7ZMqI2df5r3MComN00GI7wnW8Xs4c/ba25AUwcl8hteBupnbWvJTnpYz/lgvxk5aVs2qxNrm+TS4YZra8ZK1cXaP/dMJa46mnTr529UN/LgSvt+3lVtLi248Ewoenn+7XgjwCggBtx75svSKos35UySaLukzQrD/Cs8ce5JDD/5WsVECm2V7oHh/bqW9nG0aIzRf+67Zn/yWb1hEyi88VP2ZN9EWnhejEMHM2TaBQFeb4WKq7sWr74naJBxkKyDXzEUZhVhXIpF3DAv8ez53XXzHI3cIJ038EpWyXjTL7maQlcaFNj2OWhDzio4walKZ5r3r6b1KN5CaUMdaKNphUBQi0RBCRIfLwqE+6QeLgiw1i+QIm9HKPMDdHxUe5ffrb7TMd7yqhyc5J0fsS1XMm/zIghBXuWAI96VcKrAEedVi+NcAtFWIntAfY0e4HhDjdbyieBwN1q77+x8f6a7Z/FMEUP76oTW1nfOXmMeRw1125pfq0XwtzJNtCV1uxEfwtgBPf947hthOtpRUNgYiQZOdoobqSplFjXurj9EIYIF/JXYNEOwpmUqf6x9TIPqIVDKl0jfHh13PzavANbmLuxUVV4wlYdP5C+NAjIELyf0YLClxty1HVYQHjYkgiCtHZk1Pakm9zKGdyGioh/cJdcBA0JwKwVojk9GNjQBxpUehxGOJMv6Ne7FEmCpitFaHODTiP9yQpfP8Ma9Nb9faXFm+cxEdwsvjlY0Mi559IFe2pEgvNe0o3vO5PUs5UpxkQJwk+tK5phPgUAytXmi3Wc1s+wEqN/sGcPI6DbU3Ge6UkJWDJYQO/0zzMbHbdbYuF03q42M9SWEZkWPtgn+8grO1nFTtbXtwSUCS7H2pXPuqOGvPs/y++zqGAUYLOxCsIJDmS9y6Vn2bO1LoC6OcZzTHJG6AdIMQMQ/z456IV/wC87iWIqafBg5W0305nqSHBSLzxkNvdMjwdsHK0s4OFg/xSiSPGgO27x3SVcYCIOlcyrvRAjMvCZcxKgvN7o1SDLgeoMGt+GzGjf3ckT9bshTDyTIt9f63FAuf9HZAehDiHns5w5a+qoQiKR6CW7iLpFz431yr2tdH65iNTDWzI54H5pR0zYgYk2tXuEDquSGfaYe1NFyVVwdMgufOVjJQ/bkzNH+IBcwcXZnVd38S/9G6cTvWQdjjECZGTOsUH5IauQToy+kd5N82Lv7/fgrvzv0fyAYRk5nmxbhignVd3FCyxEHWgm0/lJCD8M6zriFaYptXD/ojObrzTgkG6VbCf5rhl43HU2Pk08n/ae1qGJZYwDyKeJ6Q6so76ZXDRcV5LEIx6ko+ieXYRornPLJlcuc3Y9Wwiw5AuTZ6JGru40FqbHmY/NeNFg+olSLiKYOIFQJAcRWEohKv2wBfNPZVC0G7UXafcfDiuotz8Mqmkh79LG0NWzfWkybUouKWw38Iwb+aUogHeyHcaOj7A5z9JEhvRvkVIampEy362NfL+F8pEsQcuqy0/jSyXfjHsRUSyoTkbJPuQt4Ux6NQAqozdplw8KuuAksI2+l4N4d8wsE9Ibpm0VEc52Zsxk9KltToxslDNNBVSN2jdIgbalxABQoamVkHMO9AqzY68FyyvL8xOMPOYDd5er/J5SRlPaLx9YxPDaPz25wFI9qXuMPHXyT2gbLrzIEHOU4aN4hyQGrWw8eZhPSgaoqevz+ckIfyjgpzwCXJNAdFkwqoSGOWu/GUcd1cQy0rRu2WLWuT7BxjweKRq4t5M+vuCbLubdfcrl+sm5/2CUyDOrrugnKVZM1wM1kWQW8gIFJQBWXEmg5N6BJ3uij8KWA+UQm+xSaG3u5w42k4uWOFCkppWykjMfWbNxRT/A+FZArP452obRFfDVR6M0iNbElSyAnmEG9RlTyP/VIV/kuDGFeZNqZwElyVQ0wpIcsD39MMY8+nv35yVZ496mLxqhW+9gLvXOYlIv+DI0Dw4KGMPCIFedDLZewVyzSmkgI9X6MqM5YKodvXKCxN6wXIErxhtk7qu9Q91hLtsM2p68K1CVlAl1fM+Al0GOeyGumofQAegySpLsIWB4o=",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "Content-Type",
+      "raw_value": "multipart/related; boundary=\"_008_SA0PR19MB4411E817500DBC61127A5670FC7CASA0PR19MB4411namp_\"; type=\"multipart/alternative\"",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "Importance",
+      "raw_value": "high",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "X-Priority",
+      "raw_value": "1",
+      "decoded_value": null,
+      "parsed": null
+    },
+    {
+      "name": "MIME-Version",
+      "raw_value": "1.0",
+      "decoded_value": null,
+      "parsed": null
+    }
+  ],
+  "routing": [
+    {
+      "hop_number": 0,
+      "raw_received": "from LV8PR22MB5315.namprd22.prod.outlook.com (2603:10b6:408:1ca::6) by SA0PR22MB2143.namprd22.prod.outlook.com with HTTPS; Wed, 4 Mar 2026 04:30:44 +0000",
+      "from_host": "LV8PR22MB5315.namprd22.prod.outlook.com (2603:10b6:408:1ca::6)",
+      "by_host": "SA0PR22MB2143.namprd22.prod.outlook.com",
+      "with_proto": "HTTPS",
+      "id": null,
+      "for_address": null,
+      "date_raw": "Wed, 4 Mar 2026 04:30:44 +0000",
+      "timestamp": "2026-03-04 04:30:44+00:00",
+      "is_private_ip": false,
+      "anomalies": []
+    },
+    {
+      "hop_number": 1,
+      "raw_received": "from SJ0PR03CA0340.namprd03.prod.outlook.com (2603:10b6:a03:39c::15) by LV8PR22MB5315.namprd22.prod.outlook.com (2603:10b6:408:1ca::6) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9654.20; Wed, 4 Mar 2026 04:30:38 +0000",
+      "from_host": "SJ0PR03CA0340.namprd03.prod.outlook.com (2603:10b6:a03:39c::15)",
+      "by_host": "LV8PR22MB5315.namprd22.prod.outlook.com",
+      "with_proto": "Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9654.20",
+      "id": "15.20.9654.20",
+      "for_address": null,
+      "date_raw": "Wed, 4 Mar 2026 04:30:38 +0000",
+      "timestamp": "2026-03-04 04:30:38+00:00",
+      "is_private_ip": false,
+      "anomalies": []
+    },
+    {
+      "hop_number": 2,
+      "raw_received": "from SJ5PEPF000001F7.namprd05.prod.outlook.com (2603:10b6:a03:39c:cafe::e3) by SJ0PR03CA0340.outlook.office365.com (2603:10b6:a03:39c::15) with Microsoft SMTP Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.20.9654.22 via Frontend Transport; Wed, 4 Mar 2026 04:30:17 +0000",
+      "from_host": "SJ5PEPF000001F7.namprd05.prod.outlook.com (2603:10b6:a03:39c:cafe::e3)",
+      "by_host": "SJ0PR03CA0340.outlook.office365.com",
+      "with_proto": "Microsoft SMTP Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.20.9654.22 via Frontend Transport",
+      "id": "15.20.9654.22 via Frontend Transport",
+      "for_address": null,
+      "date_raw": "Wed, 4 Mar 2026 04:30:17 +0000",
+      "timestamp": "2026-03-04 04:30:17+00:00",
+      "is_private_ip": false,
+      "anomalies": [
+        "non_monotonic_timestamp"
+      ]
+    },
+    {
+      "hop_number": 3,
+      "raw_received": "from BL0PR03CU003.outbound.protection.outlook.com (2a01:111:f403:c101::7) by SJ5PEPF000001F7.mail.protection.outlook.com (2603:10b6:a0f:fc02::14b) with Microsoft SMTP Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.20.9654.16 via Frontend Transport; Wed, 4 Mar 2026 04:30:38 +0000",
+      "from_host": "BL0PR03CU003.outbound.protection.outlook.com (2a01:111:f403:c101::7)",
+      "by_host": "SJ5PEPF000001F7.mail.protection.outlook.com",
+      "with_proto": "Microsoft SMTP Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.20.9654.16 via Frontend Transport",
+      "id": "15.20.9654.16 via Frontend Transport",
+      "for_address": null,
+      "date_raw": "Wed, 4 Mar 2026 04:30:38 +0000",
+      "timestamp": "2026-03-04 04:30:38+00:00",
+      "is_private_ip": false,
+      "anomalies": []
+    },
+    {
+      "hop_number": 4,
+      "raw_received": "from SA0PR19MB4411.namprd19.prod.outlook.com (2603:10b6:806:b1::18) by SA0PR19MB4412.namprd19.prod.outlook.com (2603:10b6:806:ba::17) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9654.22; Wed, 4 Mar 2026 04:30:35 +0000",
+      "from_host": "SA0PR19MB4411.namprd19.prod.outlook.com (2603:10b6:806:b1::18)",
+      "by_host": "SA0PR19MB4412.namprd19.prod.outlook.com",
+      "with_proto": "Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9654.22",
+      "id": "15.20.9654.22",
+      "for_address": null,
+      "date_raw": "Wed, 4 Mar 2026 04:30:35 +0000",
+      "timestamp": "2026-03-04 04:30:35+00:00",
+      "is_private_ip": false,
+      "anomalies": []
+    },
+    {
+      "hop_number": 5,
+      "raw_received": "from SA0PR19MB4411.namprd19.prod.outlook.com ([fe80::d690:8cee:d0dd:4e4c]) by SA0PR19MB4411.namprd19.prod.outlook.com ([fe80::d690:8cee:d0dd:4e4c%4]) with mapi id 15.20.9654.022; Wed, 4 Mar 2026 04:30:34 +0000",
+      "from_host": "SA0PR19MB4411.namprd19.prod.outlook.com ([fe80::d690:8cee:d0dd:4e4c])",
+      "by_host": "SA0PR19MB4411.namprd19.prod.outlook.com",
+      "with_proto": "mapi id 15.20.9654.022",
+      "id": "15.20.9654.022",
+      "for_address": null,
+      "date_raw": "Wed, 4 Mar 2026 04:30:34 +0000",
+      "timestamp": "2026-03-04 04:30:34+00:00",
+      "is_private_ip": false,
+      "anomalies": []
+    }
+  ],
+  "authentication": {
+    "raw_headers": [],
+    "parsed_results": [],
+    "dkim_verified": null,
+    "dkim_verify_error": null,
+    "spf_dns_record": null,
+    "dmarc_dns_record": null,
+    "dns_queried": false
+  },
+  "bodies": [
+    {
+      "content_type": "text/plain",
+      "charset": "utf-8",
+      "encoding": "base64",
+      "content": "\r\n\r\n0o\r\n\r\nHola,region.centro@fonacot.gob.mx\r\n\r\n\r\n\r\nLe informamos que el acceso para su cuenta region.centro@fonacot.gob.mx\r\nser\u00e1 bloqueada ya que ha estado ignorando nuestros mensajes de verificaci\u00f3n de cuenta Outlook.\r\n\r\n\r\n\r\ntiene que validarse, Es necesario que confirme sus datos y agregue su n\u00famero de WhatsApp para mantener vigente su cuenta.\ud83d\udca1\r\n\r\n\r\n\r\nIngresa en el enlace a continuaci\u00f3n: \u2b07\r\n\r\n\r\n\r\n \ud83d\udcf2 cvsdredtisosec.iceiy.com/\r\n\r\n\r\n\r\n<https://go.microsoft.com/fwlink/?linkid=2243825>\r\n\r\n\r\n\r\n\r\n\r\nObt\u00e9n la aplicaci\u00f3n m\u00f3vil gratis\r\n\r\nLas aplicaciones para iOS y Android son gratuitas. Hacen que el uso de sus distintas cuentas y calendarios sea sencillo y coherente.\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
+      "content_hash": "057aa7de2912e45c4a1164cd40e9332a6e9f7e223f8d0b7116de00cf692c1413",
+      "saved_path": "../output/body_1.txt",
+      "size": 702
+    },
+    {
+      "content_type": "text/html",
+      "charset": "utf-8",
+      "encoding": "base64",
+      "content": "<html><head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\r\n<meta name=\"Generator\" content=\"Microsoft Word 15 (filtered medium)\">\r\n<!--[if !mso]><style>v\\:* {behavior:url(#default#VML);}\r\no\\:* {behavior:url(#default#VML);}\r\nw\\:* {behavior:url(#default#VML);}\r\n.shape {behavior:url(#default#VML);}\r\n</style><![endif]--><style><!--\r\n/* Font Definitions */\r\n@font-face\r\n\t{font-family:\"Cambria Math\";\r\n\tpanose-1:2 4 5 3 5 4 6 3 2 4;}\r\n@font-face\r\n\t{font-family:Calibri;\r\n\tpanose-1:2 15 5 2 2 2 4 3 2 4;}\r\n@font-face\r\n\t{font-family:\"Segoe UI Emoji\";\r\n\tpanose-1:2 11 5 2 4 2 4 2 2 3;}\r\n@font-face\r\n\t{font-family:\"Segoe UI\";\r\n\tpanose-1:2 11 5 2 4 2 4 2 2 3;}\r\n/* Style Definitions */\r\np.MsoNormal, li.MsoNormal, div.MsoNormal\r\n\t{margin-top:0cm;\r\n\tmargin-right:0cm;\r\n\tmargin-bottom:8.0pt;\r\n\tmargin-left:0cm;\r\n\tline-height:107%;\r\n\tfont-size:11.0pt;\r\n\tfont-family:\"Calibri\",sans-serif;\r\n\tmso-fareast-language:EN-US;}\r\n.MsoChpDefault\r\n\t{mso-style-type:export-only;\r\n\tfont-family:\"Calibri\",sans-serif;\r\n\tmso-ligatures:none;\r\n\tmso-fareast-language:EN-US;}\r\n.MsoPapDefault\r\n\t{mso-style-type:export-only;\r\n\tmargin-bottom:8.0pt;\r\n\tline-height:107%;}\r\n@page WordSection1\r\n\t{size:612.0pt 792.0pt;\r\n\tmargin:70.85pt 3.0cm 70.85pt 3.0cm;}\r\ndiv.WordSection1\r\n\t{page:WordSection1;}\r\n--></style><!--[if gte mso 9]><xml>\r\n<o:shapedefaults v:ext=\"edit\" spidmax=\"1026\" />\r\n</xml><![endif]--><!--[if gte mso 9]><xml>\r\n<o:shapelayout v:ext=\"edit\">\r\n<o:idmap v:ext=\"edit\" data=\"1\" />\r\n</o:shapelayout></xml><![endif]-->\r\n</head>\r\n<body lang=\"ES-CO\" style=\"word-wrap:break-word\">\r\n<div class=\"WordSection1\">\r\n<p class=\"MsoNormal\" align=\"center\" style=\"margin-bottom:0cm;text-align:center;line-height:normal;background:white;vertical-align:baseline\">\r\n<span style=\"font-size:11.5pt;font-family:&quot;Segoe UI&quot;,sans-serif;color:#242424;mso-fareast-language:ES-CO\"><o:p>&nbsp;</o:p></span></p>\r\n<div align=\"center\">\r\n<table class=\"MsoNormalTable\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"660\" style=\"width:495.35pt;background:#F1F1F1;border-collapse:collapse\">\r\n<tbody>\r\n<tr style=\"height:27.6pt\">\r\n<td width=\"660\" style=\"width:495.35pt;padding:0cm 0cm 0cm 0cm;height:27.6pt\">\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;line-height:13.8pt\"><span style=\"color:black\"><img width=\"116\" height=\"26\" id=\"Imagen_x0020_5\" src=\"cid:image001.png@01DCAB63.402B6510\"></span><span style=\"font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif;color:black;mso-fareast-language:ES-CO\">0o</span><span style=\"font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif;mso-fareast-language:ES-CO\"><o:p></o:p></span></p>\r\n</td>\r\n</tr>\r\n<tr style=\"height:185.6pt\">\r\n<td width=\"660\" style=\"width:495.35pt;padding:0cm 0cm 0cm 21.0pt;height:185.6pt\">\r\n<div align=\"center\">\r\n<table class=\"MsoNormalTable\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"660\" style=\"width:495.35pt;background:#F1F1F1;border-collapse:collapse\">\r\n<tbody>\r\n<tr style=\"height:27.6pt\">\r\n<td width=\"660\" style=\"width:495.35pt;padding:0cm 0cm 0cm 0cm;height:27.6pt\">\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;mso-line-height-alt:13.8pt\"><b><span lang=\"ES-EC\" style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;color:black;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\">Hola,region.centro@fonacot.gob.mx</span></b><span style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;mso-fareast-language:ES-CO\"><o:p></o:p></span></p>\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;mso-line-height-alt:13.8pt\"><b><span lang=\"ES-EC\" style=\"font-size:18.0pt;font-family:&quot;Arial&quot;,sans-serif;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\"><o:p>&nbsp;</o:p></span></b></p>\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;mso-line-height-alt:13.8pt\"><span lang=\"ES-EC\" style=\"font-size:18.0pt;font-family:&quot;Arial&quot;,sans-serif;color:black;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\">Le informamos que el acceso\r\n para su cuenta&nbsp;region.centro@fonacot.gob.mx<b><br>\r\n</b></span><span style=\"font-size:18.0pt;color:black\">ser\u00e1 bloqueada ya que ha estado ignorando nuestros mensajes de verificaci\u00f3n de cuenta\r\n<b>Outlook.<br>\r\n<br>\r\n</b></span><b><span lang=\"ES-EC\" style=\"font-size:18.0pt;font-family:&quot;Arial&quot;,sans-serif;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\"><o:p></o:p></span></b></p>\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;mso-line-height-alt:13.8pt\"><span lang=\"ES-EC\" style=\"font-size:18.0pt;font-family:&quot;Arial&quot;,sans-serif;color:black;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\">tiene que validarse, Es necesario\r\n<a name=\"_Hlk208757070\">que </a></span><span style=\"mso-bookmark:_Hlk208757070\"><span style=\"font-size:18.0pt;color:black\">confirme sus datos y agregue su n\u00famero de\r\n</span></span><span style=\"mso-bookmark:_Hlk208757070\"><span style=\"font-size:18.0pt;color:#388600\">WhatsApp\r\n</span></span><span style=\"mso-bookmark:_Hlk208757070\"><span style=\"font-size:18.0pt;color:black\">para mantener vigente su\r\n<b>cuenta</b>.</span></span><span style=\"font-size:18.0pt;font-family:&quot;Segoe UI Emoji&quot;,sans-serif;color:black\">\ud83d\udca1</span><span style=\"font-size:18.0pt;font-family:&quot;Arial&quot;,sans-serif;mso-fareast-language:ES-CO\"><o:p></o:p></span></p>\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;mso-line-height-alt:13.8pt\"><span lang=\"ES-EC\" style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;color:black;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\">&nbsp;</span><span style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;mso-fareast-language:ES-CO\"><o:p></o:p></span></p>\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;line-height:13.8pt\"><b><span lang=\"ES-EC\" style=\"font-family:&quot;Arial&quot;,sans-serif;color:black;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\">Ingresa en el enlace a continuaci\u00f3n:</span></b><span lang=\"ES-EC\" style=\"font-family:&quot;Cambria Math&quot;,serif;color:black\">\r\n</span><span style=\"font-family:&quot;Cambria Math&quot;,serif;color:black\">\u2b07</span><b><span style=\"font-family:&quot;Arial&quot;,sans-serif;mso-fareast-language:ES-CO\"><o:p></o:p></span></b></p>\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;mso-line-height-alt:13.8pt\"><span lang=\"ES-EC\" style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;color:black;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\">&nbsp;</span><span style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;mso-fareast-language:ES-CO\"><o:p></o:p></span></p>\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;mso-line-height-alt:13.8pt\"><span lang=\"ES-EC\" style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;color:black;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\">&nbsp;</span><span lang=\"ES-EC\" style=\"font-size:14.0pt;font-family:&quot;Segoe UI Emoji&quot;,sans-serif;color:black;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\">\ud83d\udcf2\r\n</span><span lang=\"ES-EC\" style=\"font-size:16.0pt;font-family:&quot;Segoe UI Emoji&quot;,sans-serif;color:black;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\">cvsdredtisosec.iceiy.com/</span><span style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;mso-fareast-language:ES-CO\"><o:p></o:p></span></p>\r\n</td>\r\n<td style=\"border:none;padding:0cm 0cm 0cm 0cm\" width=\"48\" colspan=\"2\">\r\n<p class=\"MsoNormal\">&nbsp;</p>\r\n</td>\r\n</tr>\r\n<tr style=\"height:27.6pt\">\r\n<td width=\"660\" style=\"width:495.35pt;background:transparent;padding:0cm 0cm 0cm 0cm;height:27.6pt\">\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;line-height:13.8pt\"><a href=\"https://go.microsoft.com/fwlink/?linkid=2243825\" target=\"_blank\" title=\"https://go.microsoft.com/fwlink/?linkid=2243825\"><span style=\"font-size:14.0pt;color:windowtext;text-decoration:none\"><img border=\"0\" width=\"321\" height=\"346\" id=\"Imagen_x0020_4\" src=\"cid:image002.png@01DCAB63.402B6510\"></span></a><span style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;mso-fareast-language:ES-CO\"><o:p></o:p></span></p>\r\n</td>\r\n<td width=\"660\" style=\"width:495.35pt;background:transparent;padding:0cm 0cm 0cm 0cm;height:27.6pt\">\r\n</td>\r\n<td valign=\"top\" style=\"background:transparent;padding:0cm 0cm 0cm 0cm;height:27.6pt\">\r\n<p class=\"MsoNormal\"><o:p>&nbsp;</o:p></p>\r\n</td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n</div>\r\n</td>\r\n</tr>\r\n<tr style=\"height:135.35pt\">\r\n<td width=\"660\" style=\"width:495.35pt;padding:0cm 0cm 0cm 0cm;height:135.35pt\">\r\n<table class=\"MsoNormalTable\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"665\" style=\"width:498.65pt;background:white;border-collapse:collapse\">\r\n<tbody>\r\n<tr style=\"height:181.35pt\">\r\n<td width=\"246\" style=\"width:184.5pt;padding:24.0pt 21.0pt 24.0pt 36.0pt;height:181.35pt\">\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;mso-line-height-alt:13.8pt\"><span style=\"font-size:14.0pt;color:black\"><img border=\"0\" width=\"170\" height=\"170\" id=\"Imagen_x0020_3\" src=\"cid:image003.png@01DCAB63.402B6510\"></span><span style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;mso-fareast-language:ES-CO\"><o:p></o:p></span></p>\r\n</td>\r\n<td width=\"419\" style=\"width:314.15pt;padding:24.0pt 27.0pt 7.5pt 0cm;height:181.35pt\">\r\n<table class=\"MsoNormalTable\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"401\" style=\"width:300.55pt;border-collapse:collapse\">\r\n<tbody>\r\n<tr style=\"height:24.8pt\">\r\n<td width=\"401\" style=\"width:300.55pt;padding:0cm 0cm 7.5pt 0cm;height:24.8pt\">\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;mso-line-height-alt:13.8pt\"><b><span lang=\"ES-EC\" style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\">Obt\u00e9n la aplicaci\u00f3n m\u00f3vil gratis</span></b><span style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;mso-fareast-language:ES-CO\"><o:p></o:p></span></p>\r\n</td>\r\n</tr>\r\n<tr style=\"height:60.0pt\">\r\n<td width=\"401\" style=\"width:300.55pt;padding:0cm 0cm 7.5pt 0cm;height:60.0pt\">\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;mso-line-height-alt:13.8pt\"><span lang=\"ES-EC\" style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\">Las aplicaciones para iOS y Android son\r\n gratuitas. Hacen que el uso de sus distintas cuentas y calendarios sea sencillo y coherente.</span><span style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;mso-fareast-language:ES-CO\"><o:p></o:p></span></p>\r\n</td>\r\n</tr>\r\n<tr style=\"height:35.55pt\">\r\n<td width=\"401\" style=\"width:300.55pt;padding:0cm 0cm 0cm 0cm;height:35.55pt\">\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;mso-line-height-alt:13.8pt\"><span style=\"font-size:14.0pt\"><img border=\"0\" width=\"114\" height=\"38\" id=\"Imagen_x0020_2\" src=\"cid:image004.png@01DCAB63.402B6510\"><img border=\"0\" width=\"126\" height=\"38\" id=\"Imagen_x0020_1\" src=\"cid:image005.png@01DCAB63.402B6510\"></span><span style=\"font-size:14.0pt;font-family:&quot;Arial&quot;,sans-serif;mso-fareast-language:ES-CO\"><o:p></o:p></span></p>\r\n</td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n</td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n</td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n</div>\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;line-height:13.8pt;background:white\">\r\n<span lang=\"ES-EC\" style=\"font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif;color:#242424;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\">&nbsp;</span><span style=\"font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif;color:#242424;mso-fareast-language:ES-CO\"><o:p></o:p></span></p>\r\n<p class=\"MsoNormal\" style=\"margin-bottom:0cm;line-height:13.8pt;background:white\">\r\n<span lang=\"ES-EC\" style=\"font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif;color:#242424;border:none windowtext 1.0pt;padding:0cm;mso-fareast-language:ES-CO\">&nbsp;</span><span style=\"font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif;color:#242424;mso-fareast-language:ES-CO\"><o:p></o:p></span></p>\r\n<p class=\"MsoNormal\"><o:p>&nbsp;</o:p></p>\r\n</div>\r\n</body>\r\n</html>\r\n",
+      "content_hash": "b5c9789f03403f184ae250270b5994c1852a3f38b0ef05ef688bcf07159a5f3a",
+      "saved_path": "../output/body_2.html",
+      "size": 12098
+    }
+  ],
+  "attachments": [
+    {
+      "id": "3bac961d-a2d1-40d5-8dbf-538d4e3add36",
+      "filename_raw": "image001.png",
+      "filename_decoded": null,
+      "content_type": "image/png",
+      "content_disposition": "inline",
+      "size": 2615,
+      "hashes": {
+        "md5": "ab782af7a3754a438ceaca56c1f8fda2",
+        "sha1": "255c8ffcb29fff237dac6f04132af9e188cdc1be",
+        "sha256": "98f062abe564d250ce0f60f550bf9ed95ebb2fa3c267e096940c461f7e65607d"
+      },
+      "magic_type": "unknown (python-magic not installed)",
+      "is_risky": false,
+      "risk_flags": [],
+      "saved_path": "../output/attachments/3bac961d-a2d1-40d5-8dbf-538d4e3add36_image001.png",
+      "deep_analysis": null
+    },
+    {
+      "id": "1c4b3b87-c3fa-4d42-ab8e-8926d9d30540",
+      "filename_raw": "image002.png",
+      "filename_decoded": null,
+      "content_type": "image/png",
+      "content_disposition": "inline",
+      "size": 105360,
+      "hashes": {
+        "md5": "01b0c388c82ba76f271baaf2357dd8f0",
+        "sha1": "a5a90062d1d1fd6200497fe5059d7bfc7ad338ab",
+        "sha256": "0012a9262965e78c5dfd175263b0f4a47a45f0c1740dffa56a8245a831818dd9"
+      },
+      "magic_type": "unknown (python-magic not installed)",
+      "is_risky": false,
+      "risk_flags": [],
+      "saved_path": "../output/attachments/1c4b3b87-c3fa-4d42-ab8e-8926d9d30540_image002.png",
+      "deep_analysis": null
+    },
+    {
+      "id": "68799646-ee3d-4f8e-bf5f-c6157a91b6ac",
+      "filename_raw": "image003.png",
+      "filename_decoded": null,
+      "content_type": "image/png",
+      "content_disposition": "inline",
+      "size": 18986,
+      "hashes": {
+        "md5": "d908e5b0f9d045b339e80a5556815e34",
+        "sha1": "89d18e9d9781b3796bb6d2114e9f5081027d5aca",
+        "sha256": "b1902efa0d2806e35cfae69189bfab4097182c51f9f6228e5400a42665718902"
+      },
+      "magic_type": "unknown (python-magic not installed)",
+      "is_risky": false,
+      "risk_flags": [],
+      "saved_path": "../output/attachments/68799646-ee3d-4f8e-bf5f-c6157a91b6ac_image003.png",
+      "deep_analysis": null
+    },
+    {
+      "id": "98be9581-3a54-47d5-b651-83aa734c3d63",
+      "filename_raw": "image004.png",
+      "filename_decoded": null,
+      "content_type": "image/png",
+      "content_disposition": "inline",
+      "size": 3532,
+      "hashes": {
+        "md5": "b70ac98f89f65ced5f9933affe590c8c",
+        "sha1": "c032ee48211830556b93fd2a9a9b94119a24ae3a",
+        "sha256": "f2af1e303ed2e48f120e587fab6e90d1cd561a3e035c1b656e15df2f5e8ee87d"
+      },
+      "magic_type": "unknown (python-magic not installed)",
+      "is_risky": false,
+      "risk_flags": [],
+      "saved_path": "../output/attachments/98be9581-3a54-47d5-b651-83aa734c3d63_image004.png",
+      "deep_analysis": null
+    },
+    {
+      "id": "2cc1164a-7777-44d1-b66f-cad33ecaddbd",
+      "filename_raw": "image005.png",
+      "filename_decoded": null,
+      "content_type": "image/png",
+      "content_disposition": "inline",
+      "size": 3967,
+      "hashes": {
+        "md5": "0316cd3b495dfcc9e0a94a097a69061d",
+        "sha1": "73de1dd77f5e1c1aab8457814587d7a9468444ab",
+        "sha256": "e724599ab33d945fa1fc19684275c142d8fdc8fecf32ff1997282550bc450783"
+      },
+      "magic_type": "unknown (python-magic not installed)",
+      "is_risky": false,
+      "risk_flags": [],
+      "saved_path": "../output/attachments/2cc1164a-7777-44d1-b66f-cad33ecaddbd_image005.png",
+      "deep_analysis": null
+    }
+  ],
+  "urls": [
+    {
+      "raw": "https://go.microsoft.com/fwlink/?linkid=2243825",
+      "normalized": "https://go.microsoft.com/fwlink/?linkid=2243825",
+      "deobfuscated": "https://go.microsoft.com/fwlink/?linkid=2243825",
+      "context": " cuenta.\ud83d\udca1\r\n\r\n\r\n\r\nIngresa en el enlace a continuaci\u00f3n: \u2b07\r\n\r\n\r\n\r\n \ud83d\udcf2 cvsdredtisosec.iceiy.com/\r\n\r\n\r\n\r\n<https://go.microsoft.com/fwlink/?linkid=2243825>\r\n\r\n\r\n\r\n\r\n\r\nObt\u00e9n la aplicaci\u00f3n m\u00f3vil gratis\r\n\r\nLas aplicaciones para iOS y Android son gratuitas. ",
+      "source": "plain",
+      "evidence_ref": "bodies.plain",
+      "is_obfuscated": false,
+      "obfuscation_type": "spaced slash substitution"
+    },
+    {
+      "raw": "https://go.microsoft.com/fwlink/?linkid=2243825",
+      "normalized": "https://go.microsoft.com/fwlink/?linkid=2243825",
+      "deobfuscated": "https://go.microsoft.com/fwlink/?linkid=2243825",
+      "context": "<a href=\"https://go.microsoft.com/fwlink/?linkid=2243825\" target=\"_blank\" title=\"https://go.microsoft.com/fwlink/?linkid=2243825\"><span style=\"font-size:14.0pt;color:windowtext;text-decoration:none\"><",
+      "source": "html_href",
+      "evidence_ref": "bodies.html.href",
+      "is_obfuscated": false,
+      "obfuscation_type": "spaced slash substitution"
+    }
+  ],
+  "iocs": [
+    {
+      "value": "lv8pr22mb5315.namprd22.prod.outlook.com",
+      "type": "domain",
+      "normalized": "lv8pr22mb5315.namprd22.prod.outlook.com",
+      "context": "from LV8PR22MB5315.namprd22.prod.outlook.com (2603:10b6:408:1ca::6) by SA0PR22MB2143.namprd22.",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "sa0pr22mb2143.namprd22.prod.outlook.com",
+      "type": "domain",
+      "normalized": "sa0pr22mb2143.namprd22.prod.outlook.com",
+      "context": "mprd22.prod.outlook.com (2603:10b6:408:1ca::6) by SA0PR22MB2143.namprd22.prod.outlook.com with HTTPS; Wed, 4 Mar 2026 04:30:44 +0000",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "2603:10b6:408:1ca::",
+      "type": "ipv6",
+      "normalized": "2603:10b6:408:1ca::",
+      "context": "from LV8PR22MB5315.namprd22.prod.outlook.com (2603:10b6:408:1ca::6) by SA0PR22MB2143.namprd22.prod.outlook.com with",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "sj0pr03ca0340.namprd03.prod.outlook.com",
+      "type": "domain",
+      "normalized": "sj0pr03ca0340.namprd03.prod.outlook.com",
+      "context": "from SJ0PR03CA0340.namprd03.prod.outlook.com (2603:10b6:a03:39c::15) by LV8PR22MB5315.namprd22",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "2603:10b6:a03:39c::",
+      "type": "ipv6",
+      "normalized": "2603:10b6:a03:39c::",
+      "context": "from SJ0PR03CA0340.namprd03.prod.outlook.com (2603:10b6:a03:39c::15) by LV8PR22MB5315.namprd22.prod.outlook.com (26",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "sj5pepf000001f7.namprd05.prod.outlook.com",
+      "type": "domain",
+      "normalized": "sj5pepf000001f7.namprd05.prod.outlook.com",
+      "context": "from SJ5PEPF000001F7.namprd05.prod.outlook.com (2603:10b6:a03:39c:cafe::e3) by SJ0PR03CA0340.out",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "sj0pr03ca0340.outlook.office365.com",
+      "type": "domain",
+      "normalized": "sj0pr03ca0340.outlook.office365.com",
+      "context": ".prod.outlook.com (2603:10b6:a03:39c:cafe::e3) by SJ0PR03CA0340.outlook.office365.com (2603:10b6:a03:39c::15) with Microsoft SMTP Serve",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "2603:10b6:a03:39c:cafe::",
+      "type": "ipv6",
+      "normalized": "2603:10b6:a03:39c:cafe::",
+      "context": "from SJ5PEPF000001F7.namprd05.prod.outlook.com (2603:10b6:a03:39c:cafe::e3) by SJ0PR03CA0340.outlook.office365.com (2603:1",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "bl0pr03cu003.outbound.protection.outlook.com",
+      "type": "domain",
+      "normalized": "bl0pr03cu003.outbound.protection.outlook.com",
+      "context": "from BL0PR03CU003.outbound.protection.outlook.com (2a01:111:f403:c101::7) by SJ5PEPF000001F7.mail.p",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "sj5pepf000001f7.mail.protection.outlook.com",
+      "type": "domain",
+      "normalized": "sj5pepf000001f7.mail.protection.outlook.com",
+      "context": "protection.outlook.com (2a01:111:f403:c101::7) by SJ5PEPF000001F7.mail.protection.outlook.com (2603:10b6:a0f:fc02::14b) with Microsoft SMTP Ser",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "2a01:111:f403:c101::",
+      "type": "ipv6",
+      "normalized": "2a01:111:f403:c101::",
+      "context": "rom BL0PR03CU003.outbound.protection.outlook.com (2a01:111:f403:c101::7) by SJ5PEPF000001F7.mail.protection.outlook.com ",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "2603:10b6:a0f:fc02::",
+      "type": "ipv6",
+      "normalized": "2603:10b6:a0f:fc02::",
+      "context": ") by SJ5PEPF000001F7.mail.protection.outlook.com (2603:10b6:a0f:fc02::14b) with Microsoft SMTP Server (version=TLS1_3, c",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "sa0pr19mb4411.namprd19.prod.outlook.com",
+      "type": "domain",
+      "normalized": "sa0pr19mb4411.namprd19.prod.outlook.com",
+      "context": "from SA0PR19MB4411.namprd19.prod.outlook.com (2603:10b6:806:b1::18) by SA0PR19MB4412.namprd19.",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "sa0pr19mb4412.namprd19.prod.outlook.com",
+      "type": "domain",
+      "normalized": "sa0pr19mb4412.namprd19.prod.outlook.com",
+      "context": "mprd19.prod.outlook.com (2603:10b6:806:b1::18) by SA0PR19MB4412.namprd19.prod.outlook.com (2603:10b6:806:ba::17) with Microsoft SMTP Server",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "2603:10b6:806:b1::",
+      "type": "ipv6",
+      "normalized": "2603:10b6:806:b1::",
+      "context": "from SA0PR19MB4411.namprd19.prod.outlook.com (2603:10b6:806:b1::18) by SA0PR19MB4412.namprd19.prod.outlook.com (26",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "2603:10b6:806:ba::",
+      "type": "ipv6",
+      "normalized": "2603:10b6:806:ba::",
+      "context": "::18) by SA0PR19MB4412.namprd19.prod.outlook.com (2603:10b6:806:ba::17) with Microsoft SMTP Server (version=TLS1_2, ci",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "fe80::",
+      "type": "ipv6",
+      "normalized": "fe80::",
+      "context": "from SA0PR19MB4411.namprd19.prod.outlook.com ([fe80::d690:8cee:d0dd:4e4c]) by SA0PR19MB4411.namprd19.pr",
+      "source": "header.Received",
+      "evidence_ref": "headers.Received",
+      "first_seen_in": "header.Received"
+    },
+    {
+      "value": "seg-gto.gob.mx",
+      "type": "domain",
+      "normalized": "seg-gto.gob.mx",
+      "context": "MAGDALENA DE JESUS BARRON CONEJO <m_barronc39@seg-gto.gob.mx>",
+      "source": "header.From",
+      "evidence_ref": "headers.From",
+      "first_seen_in": "header.From"
+    },
+    {
+      "value": "m_barronc39@seg-gto.gob.mx",
+      "type": "email",
+      "normalized": "m_barronc39@seg-gto.gob.mx",
+      "context": "MAGDALENA DE JESUS BARRON CONEJO <m_barronc39@seg-gto.gob.mx>",
+      "source": "header.From",
+      "evidence_ref": "headers.From",
+      "first_seen_in": "header.From"
+    },
+    {
+      "value": "region.centro",
+      "type": "domain",
+      "normalized": "region.centro",
+      "context": "Administrativo Centro <region.centro@fonacot.gob.mx>",
+      "source": "header.To",
+      "evidence_ref": "headers.To",
+      "first_seen_in": "header.To"
+    },
+    {
+      "value": "fonacot.gob.mx",
+      "type": "domain",
+      "normalized": "fonacot.gob.mx",
+      "context": "Administrativo Centro <region.centro@fonacot.gob.mx>",
+      "source": "header.To",
+      "evidence_ref": "headers.To",
+      "first_seen_in": "header.To"
+    },
+    {
+      "value": "region.centro@fonacot.gob.mx",
+      "type": "email",
+      "normalized": "region.centro@fonacot.gob.mx",
+      "context": "Administrativo Centro <region.centro@fonacot.gob.mx>",
+      "source": "header.To",
+      "evidence_ref": "headers.To",
+      "first_seen_in": "header.To"
+    },
+    {
+      "value": "sa0pr19mb4411e817500dbc61127a5670fc7ca@sa0pr19mb4411.namprd19.prod.outlook.com",
+      "type": "email",
+      "normalized": "sa0pr19mb4411e817500dbc61127a5670fc7ca@sa0pr19mb4411.namprd19.prod.outlook.com",
+      "context": "<SA0PR19MB4411E817500DBC61127A5670FC7CA@SA0PR19MB4411.namprd19.prod.outlook.com>",
+      "source": "header.Message-ID",
+      "evidence_ref": "headers.Message-ID",
+      "first_seen_in": "header.Message-ID"
+    },
+    {
+      "value": "protection.outlook.com",
+      "type": "domain",
+      "normalized": "protection.outlook.com",
+      "context": "Pass (protection.outlook.com: domain of seg-gto.gob.mx designates 2a01:111:f40",
+      "source": "header.received-spf",
+      "evidence_ref": "headers.received-spf",
+      "first_seen_in": "header.received-spf"
+    },
+    {
+      "value": "cvsdredtisosec.iceiy.com",
+      "type": "domain",
+      "normalized": "cvsdredtisosec.iceiy.com",
+      "context": "\nIngresa en el enlace a continuaci\u00f3n: \u2b07\r\n\r\n\r\n\r\n \ud83d\udcf2 cvsdredtisosec.iceiy.com/\r\n\r\n\r\n\r\n<https://go.microsoft.com/fwlink/?linkid=",
+      "source": "body_plain",
+      "evidence_ref": "bodies.0",
+      "first_seen_in": "body_plain"
+    },
+    {
+      "value": "go.microsoft.com",
+      "type": "domain",
+      "normalized": "go.microsoft.com",
+      "context": "\n\r\n\r\n \ud83d\udcf2 cvsdredtisosec.iceiy.com/\r\n\r\n\r\n\r\n<https://go.microsoft.com/fwlink/?linkid=2243825>\r\n\r\n\r\n\r\n\r\n\r\nObt\u00e9n la aplic",
+      "source": "body_plain",
+      "evidence_ref": "bodies.0",
+      "first_seen_in": "body_plain"
+    },
+    {
+      "value": "p.msonormal",
+      "type": "domain",
+      "normalized": "p.msonormal",
+      "context": ":2 11 5 2 4 2 4 2 2 3;}\r\n/* Style Definitions */\r\np.MsoNormal, li.MsoNormal, div.MsoNormal\r\n\t{margin-top:0cm;\r\n",
+      "source": "body_html",
+      "evidence_ref": "bodies.1",
+      "first_seen_in": "body_html"
+    },
+    {
+      "value": "li.msonormal",
+      "type": "domain",
+      "normalized": "li.msonormal",
+      "context": " 4 2 2 3;}\r\n/* Style Definitions */\r\np.MsoNormal, li.MsoNormal, div.MsoNormal\r\n\t{margin-top:0cm;\r\n\tmargin-right:",
+      "source": "body_html",
+      "evidence_ref": "bodies.1",
+      "first_seen_in": "body_html"
+    },
+    {
+      "value": "div.msonormal",
+      "type": "domain",
+      "normalized": "div.msonormal",
+      "context": " Style Definitions */\r\np.MsoNormal, li.MsoNormal, div.MsoNormal\r\n\t{margin-top:0cm;\r\n\tmargin-right:0cm;\r\n\tmargin-b",
+      "source": "body_html",
+      "evidence_ref": "bodies.1",
+      "first_seen_in": "body_html"
+    },
+    {
+      "value": "div.wordsection",
+      "type": "domain",
+      "normalized": "div.wordsection",
+      "context": " 792.0pt;\r\n\tmargin:70.85pt 3.0cm 70.85pt 3.0cm;}\r\ndiv.WordSection1\r\n\t{page:WordSection1;}\r\n--></style><!--[if gte m",
+      "source": "body_html",
+      "evidence_ref": "bodies.1",
+      "first_seen_in": "body_html"
+    },
+    {
+      "value": "image001.png",
+      "type": "domain",
+      "normalized": "image001.png",
+      "context": "th=\"116\" height=\"26\" id=\"Imagen_x0020_5\" src=\"cid:image001.png@01DCAB63.402B6510\"></span><span style=\"font-size:",
+      "source": "body_html",
+      "evidence_ref": "bodies.1",
+      "first_seen_in": "body_html"
+    },
+    {
+      "value": "image002.png",
+      "type": "domain",
+      "normalized": "image002.png",
+      "context": "h=\"321\" height=\"346\" id=\"Imagen_x0020_4\" src=\"cid:image002.png@01DCAB63.402B6510\"></span></a><span style=\"font-s",
+      "source": "body_html",
+      "evidence_ref": "bodies.1",
+      "first_seen_in": "body_html"
+    },
+    {
+      "value": "image003.png",
+      "type": "domain",
+      "normalized": "image003.png",
+      "context": "h=\"170\" height=\"170\" id=\"Imagen_x0020_3\" src=\"cid:image003.png@01DCAB63.402B6510\"></span><span style=\"font-size:",
+      "source": "body_html",
+      "evidence_ref": "bodies.1",
+      "first_seen_in": "body_html"
+    },
+    {
+      "value": "image004.png",
+      "type": "domain",
+      "normalized": "image004.png",
+      "context": "th=\"114\" height=\"38\" id=\"Imagen_x0020_2\" src=\"cid:image004.png@01DCAB63.402B6510\"><img border=\"0\" width=\"126\" he",
+      "source": "body_html",
+      "evidence_ref": "bodies.1",
+      "first_seen_in": "body_html"
+    },
+    {
+      "value": "image005.png",
+      "type": "domain",
+      "normalized": "image005.png",
+      "context": "th=\"126\" height=\"38\" id=\"Imagen_x0020_1\" src=\"cid:image005.png@01DCAB63.402B6510\"></span><span style=\"font-size:",
+      "source": "body_html",
+      "evidence_ref": "bodies.1",
+      "first_seen_in": "body_html"
+    },
+    {
+      "value": "https://go.microsoft.com/fwlink/?linkid=2243825",
+      "type": "url",
+      "normalized": "https://go.microsoft.com/fwlink/?linkid=2243825",
+      "context": " cuenta.\ud83d\udca1\r\n\r\n\r\n\r\nIngresa en el enlace a continuaci\u00f3n: \u2b07\r\n\r\n\r\n\r\n \ud83d\udcf2 cvsdredtisosec.iceiy.com/\r\n\r\n\r\n\r\n<https://go.microsoft.com/fwlink/?linkid=2243825>\r\n\r\n\r\n\r\n\r\n\r\nObt\u00e9n la aplicaci\u00f3n m\u00f3vil gratis\r\n\r\nLas aplicaciones para iOS y Android son gratuitas. ",
+      "source": "urls",
+      "evidence_ref": "bodies.plain",
+      "first_seen_in": "urls"
+    }
+  ],
+  "risk": {
+    "score": 20,
+    "severity": "low",
+    "reasons": [
+      {
+        "code": "routing_non_monotonic",
+        "description": "Non-monotonic timestamps in routing path",
+        "weight": 20,
+        "severity": "medium",
+        "evidence_refs": [
+          "routing.2.timestamp"
+        ]
+      }
+    ],
+    "confidence": 1.0
+  }
+}

@@ -1,0 +1,21 @@
+# Python Virtual Environments
+venv/
+.venv/
+env/
+bin/
+lib/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Operating System Files
+.DS_Store
+thumbs.db
+.directory
+
+# Security/Environment variables (Crucial!)
+.env
+*.pem
+*.key

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Drag-and-Drop Test - emltriage Web UI</title>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .drop-zone { 
+            border: 3px dashed #666; 
+            padding: 40px; 
+            text-align: center; 
+            margin: 20px 0;
+            background: #f5f5f5;
+        }
+        .drop-zone.drag-over { background: #e3f2fd; border-color: #2196f3; }
+        .log { background: #1e1e1e; color: #4caf50; padding: 15px; font-family: monospace; white-space: pre-wrap; }
+        .success { color: #4caf50; }
+        .error { color: #f44336; }
+    </style>
+</head>
+<body>
+    <h1>Drag-and-Drop File Detection Test</h1>
+    <div id="dropZone" class="drop-zone">
+        <p>Drop .eml or .json files here to test detection</p>
+        <p><small>Try dropping the EML file from the project directory</small></p>
+    </div>
+    <div id="log" class="log"></div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const log = document.getElementById('log');
+
+        function addLog(msg, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            log.innerHTML += `[${time}] <span class="${className}">${msg}</span>\n`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Replicate the detection logic from app.js
+        function handleFiles(files) {
+            const fileList = Array.from(files);
+            addLog(`Received ${fileList.length} file(s)`);
+            
+            const jsonFiles = fileList.filter(f => f.name.endsWith('.json'));
+            const emlFiles = fileList.filter(f => f.name.endsWith('.eml'));
+            
+            addLog(`  JSON files: ${jsonFiles.length}`, 'success');
+            addLog(`  EML files: ${emlFiles.length}`, emlFiles.length > 0 ? 'error' : 'success');
+            
+            if (emlFiles.length > 0) {
+                const names = emlFiles.map(f => f.name).join(', ');
+                addLog(`🚫 BLOCKED: EML files detected (${names})`, 'error');
+                addLog(`   -> These need to be processed with emltriage CLI first`, 'info');
+                addLog(`   -> User will see helpful alert message`, 'info');
+                return;
+            }
+            
+            if (jsonFiles.length === 0) {
+                addLog('🚫 BLOCKED: No JSON files found', 'error');
+                return;
+            }
+            
+            addLog(`✓ Processing ${jsonFiles.length} JSON file(s)`, 'success');
+            jsonFiles.forEach(f => {
+                addLog(`  -> ${f.name} (${(f.size/1024).toFixed(1)} KB)`);
+            });
+        }
+
+        // Drag events
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            addLog('Drop event triggered');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        // File input fallback
+        dropZone.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            input.accept = '.json,.eml';
+            input.onchange = (e) => {
+                addLog('File picker triggered');
+                handleFiles(e.target.files);
+            };
+            input.click();
+        });
+
+        addLog('Test page loaded. Ready for drag-and-drop tests.');
+        addLog('Expected behavior:');
+        addLog('  - EML files: Show error + instructions');
+        addLog('  - JSON files: Process normally');
+        addLog('  - Mixed: Block with error');
+    </script>
+</body>
+</html>

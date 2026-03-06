@@ -1,0 +1,355 @@
+# Brand Impersonation Detection Configuration
+# Default brand list for emltriage F1 (Domain/Brand Impersonation Detection)
+# Users can override via CLI: --brands-file custom_brands.yaml
+# Or filter at runtime via GUI
+
+version: "1.0"
+description: "Default brand list for impersonation detection"
+
+# Scoring algorithm weights (can be overridden)
+scoring:
+  algorithm: "weighted"  # Options: simple, weighted, threshold
+  weights:
+    levenshtein: 0.35
+    homoglyph: 0.30
+    keyword_match: 0.20
+    punycode: 0.15
+  threshold: 0.75  # Minimum score to flag as impersonation (0.0-1.0)
+  max_distance: 3  # Maximum Levenshtein distance to consider
+
+# Risk score integration
+risk_integration:
+  enabled: true
+  weight_impersonation_detected: 30
+  weight_high_confidence: 40  # Score >= 0.85
+
+# Brands organized by category for easier management
+categories:
+  technology:
+    description: "Major technology companies"
+    brands:
+      - name: "Microsoft"
+        domains: ["microsoft.com", "microsoftonline.com", "office.com", "outlook.com", "live.com", "hotmail.com", "msn.com"]
+        keywords: ["microsoft", "ms", "azure", "onedrive", "sharepoint", "teams"]
+        priority: high
+      - name: "Google"
+        domains: ["google.com", "gmail.com", "youtube.com", "drive.google.com", "docs.google.com"]
+        keywords: ["google", "gmail", "workspace", "chrome", "android"]
+        priority: high
+      - name: "Apple"
+        domains: ["apple.com", "icloud.com", "me.com", "mac.com"]
+        keywords: ["apple", "icloud", "iphone", "ipad", "macbook"]
+        priority: high
+      - name: "Amazon"
+        domains: ["amazon.com", "amazonaws.com", "aws.amazon.com"]
+        keywords: ["amazon", "aws", "prime", "web services"]
+        priority: high
+      - name: "Meta"
+        domains: ["facebook.com", "instagram.com", "whatsapp.com", "messenger.com"]
+        keywords: ["facebook", "instagram", "whatsapp", "meta"]
+        priority: high
+      - name: "Adobe"
+        domains: ["adobe.com", "acrobat.com", "creativecloud.com"]
+        keywords: ["adobe", "acrobat", "creative cloud", "pdf"]
+        priority: medium
+      - name: "Dropbox"
+        domains: ["dropbox.com"]
+        keywords: ["dropbox", "dropbox business"]
+        priority: medium
+      - name: "Salesforce"
+        domains: ["salesforce.com", "force.com"]
+        keywords: ["salesforce", "crm"]
+        priority: medium
+
+  financial_services:
+    description: "Banks, payment processors, and financial institutions"
+    brands:
+      - name: "PayPal"
+        domains: ["paypal.com", "paypal.co.uk", "paypal.de", "paypal.fr"]
+        keywords: ["paypal", "venmo", "braintree"]
+        priority: high
+      - name: "Stripe"
+        domains: ["stripe.com"]
+        keywords: ["stripe", "stripe connect"]
+        priority: medium
+      - name: "Visa"
+        domains: ["visa.com", "visasavingsedge.com"]
+        keywords: ["visa", "visa card", "verified by visa"]
+        priority: medium
+      - name: "Mastercard"
+        domains: ["mastercard.com", "mastercardservices.com"]
+        keywords: ["mastercard", "master card"]
+        priority: medium
+      - name: "American Express"
+        domains: ["americanexpress.com", "amex.com"]
+        keywords: ["american express", "amex", "centurion"]
+        priority: medium
+      - name: "Chase"
+        domains: ["chase.com", "chaseonline.chase.com", "chasebusinessonline.com"]
+        keywords: ["chase", "jpmorgan", "jpmorgan chase"]
+        priority: high
+      - name: "Bank of America"
+        domains: ["bankofamerica.com", "bofa.com"]
+        keywords: ["bank of america", "bofa"]
+        priority: high
+      - name: "Wells Fargo"
+        domains: ["wellsfargo.com"]
+        keywords: ["wells fargo"]
+        priority: high
+      - name: "Citi"
+        domains: ["citi.com", "citibank.com", "citicards.com"]
+        keywords: ["citi", "citibank", "citi cards"]
+        priority: high
+      - name: "Western Union"
+        domains: ["westernunion.com", "wu.com"]
+        keywords: ["western union", "wu"]
+        priority: medium
+      - name: "MoneyGram"
+        domains: ["moneygram.com"]
+        keywords: ["moneygram"]
+        priority: medium
+      - name: "TransferWise"
+        domains: ["wise.com", "transferwise.com"]
+        keywords: ["wise", "transferwise"]
+        priority: medium
+      - name: "Square"
+        domains: ["square.com", "squareup.com", "cash.app"]
+        keywords: ["square", "squareup", "cash app"]
+        priority: medium
+
+  government_mx:
+    description: "Mexican government institutions"
+    brands:
+      - name: "INFONAVIT"
+        domains: ["infonavit.org.mx", "infonavit.gob.mx"]
+        keywords: ["infonavit", "crédito infonavit", "mi cuenta infonavit"]
+        priority: high
+      - name: "FONACOT"
+        domains: ["fonacot.gob.mx", "fonacot.org.mx"]
+        keywords: ["fonacot", "crédito fonacot", "infonacot"]
+        priority: high
+      - name: "SAT"
+        domains: ["sat.gob.mx", "portalsat.plataforma.sat.gob.mx"]
+        keywords: ["sat", "servicio administrativo tributario", "rfc", "cfdi"]
+        priority: high
+      - name: "IMSS"
+        domains: ["imss.gob.mx", "portal.imss.gob.mx"]
+        keywords: ["imss", "seguro social", "nss", "clínica imss"]
+        priority: high
+      - name: "ISSSTE"
+        domains: ["issste.gob.mx"]
+        keywords: ["issste", "instituto seguridad servicios sociales"]
+        priority: high
+      - name: "CONSAR"
+        domains: ["consar.gob.mx", "aforeweb.consar.gob.mx"]
+        keywords: ["consar", "comisión nacional sistema ahorro"]
+        priority: medium
+      - name: "BANXICO"
+        domains: ["banxico.org.mx"]
+        keywords: ["banxico", "banco méxico", "banco central"]
+        priority: high
+      - name: "CFE"
+        domains: ["cfe.mx", "app.cfe.mx", "cfe.gob.mx"]
+        keywords: ["cfe", "comisión federal electricidad", "luz"]
+        priority: high
+      - name: "TELMEX/TELCEL"
+        domains: ["telmex.com", "telcel.com", "mitelmex.com"]
+        keywords: ["telmex", "telcel", "infinitum"]
+        priority: medium
+      - name: "Gobierno México"
+        domains: ["gob.mx", "www.gob.mx"]
+        keywords: ["gobierno", "gobierno federal", "portal"]
+        priority: high
+
+  e_commerce:
+    description: "Online retail and marketplaces"
+    brands:
+      - name: "eBay"
+        domains: ["ebay.com", "ebay.de", "ebay.co.uk"]
+        keywords: ["ebay"]
+        priority: high
+      - name: "Alibaba"
+        domains: ["alibaba.com", "aliexpress.com", "1688.com"]
+        keywords: ["alibaba", "aliexpress"]
+        priority: medium
+      - name: "Shopify"
+        domains: ["shopify.com", "myshopify.com"]
+        keywords: ["shopify"]
+        priority: medium
+      - name: "Mercado Libre"
+        domains: ["mercadolibre.com", "mercadolibre.com.mx", "mercadopago.com"]
+        keywords: ["mercado libre", "mercadopago"]
+        priority: high
+      - name: "Netflix"
+        domains: ["netflix.com"]
+        keywords: ["netflix", "streaming"]
+        priority: high
+      - name: "Spotify"
+        domains: ["spotify.com"]
+        keywords: ["spotify", "streaming music"]
+        priority: medium
+      - name: "Uber"
+        domains: ["uber.com"]
+        keywords: ["uber", "uber eats"]
+        priority: medium
+      - name: "Didi"
+        domains: ["didi-food.com", "99app.com"]
+        keywords: ["didi", "didi food", "99"]
+        priority: medium
+      - name: "Rappi"
+        domains: ["rappi.com", "rappi.com.mx"]
+        keywords: ["rappi"]
+        priority: medium
+
+  shipping_logistics:
+    description: "Package delivery and logistics"
+    brands:
+      - name: "DHL"
+        domains: ["dhl.com", "dhl.de", "dhl-usa.com"]
+        keywords: ["dhl", "express"]
+        priority: high
+      - name: "FedEx"
+        domains: ["fedex.com", "fedex.com.mx"]
+        keywords: ["fedex", "federal express"]
+        priority: high
+      - name: "UPS"
+        domains: ["ups.com", "ups.com.mx"]
+        keywords: ["ups", "united parcel service"]
+        priority: high
+      - name: "USPS"
+        domains: ["usps.com", "postoffice.com"]
+        keywords: ["usps", "postal service"]
+        priority: high
+      - name: "Estafeta"
+        domains: ["estafeta.com", "estafeta.com.mx"]
+        keywords: ["estafeta"]
+        priority: medium
+      - name: "RedPack"
+        domains: ["redpack.com.mx"]
+        keywords: ["redpack"]
+        priority: medium
+      - name: "99minutos"
+        domains: ["99minutos.com"]
+        keywords: ["99 minutos", "99minutos"]
+        priority: low
+
+  security:
+    description: "Security and antivirus software"
+    brands:
+      - name: "Norton"
+        domains: ["norton.com", "nortonlifelock.com"]
+        keywords: ["norton", "lifelock", "antivirus"]
+        priority: high
+      - name: "McAfee"
+        domains: ["mcafee.com"]
+        keywords: ["mcafee", "antivirus"]
+        priority: high
+      - name: "Kaspersky"
+        domains: ["kaspersky.com"]
+        keywords: ["kaspersky", "antivirus"]
+        priority: medium
+      - name: "Avast"
+        domains: ["avast.com"]
+        keywords: ["avast", "avg"]
+        priority: medium
+
+  professional_networks:
+    description: "LinkedIn, job sites, and professional platforms"
+    brands:
+      - name: "LinkedIn"
+        domains: ["linkedin.com"]
+        keywords: ["linkedin", "linked in"]
+        priority: high
+      - name: "Indeed"
+        domains: ["indeed.com", "indeed.com.mx"]
+        keywords: ["indeed", "jobs"]
+        priority: medium
+      - name: "Glassdoor"
+        domains: ["glassdoor.com"]
+        keywords: ["glassdoor", "salaries"]
+        priority: low
+
+  cryptocurrency:
+    description: "Crypto exchanges and wallets"
+    brands:
+      - name: "Coinbase"
+        domains: ["coinbase.com"]
+        keywords: ["coinbase", "wallet"]
+        priority: high
+      - name: "Binance"
+        domains: ["binance.com"]
+        keywords: ["binance"]
+        priority: high
+      - name: "Bitso"
+        domains: ["bitso.com"]
+        keywords: ["bitso", "exchange mexico"]
+        priority: medium
+
+# Advanced detection settings
+advanced:
+  # Homoglyph character mappings (confusable unicode characters)
+  # Format: unicode_char: ascii_equivalent
+  homoglyph_map:
+    "а": "a"  # Cyrillic а (U+0430) looks like Latin a
+    "е": "e"  # Cyrillic е (U+0435) looks like Latin e
+    "о": "o"  # Cyrillic о (U+043E) looks like Latin o
+    "р": "p"  # Cyrillic р (U+0440) looks like Latin p
+    "с": "c"  # Cyrillic с (U+0441) looks like Latin c
+    "х": "x"  # Cyrillic х (U+0445) looks like Latin x
+    "і": "i"  # Cyrillic і (U+0456) looks like Latin i
+    "ј": "j"  # Cyrillic ј (U+0458) looks like Latin j
+    "ѕ": "s"  # Cyrillic ѕ (U+0455) looks like Latin s
+    "ɡ": "g"  # Latin ɡ (U+0261) looks like g
+    "ɑ": "a"  # Latin ɑ (U+0251) looks like a
+    "０": "0"  # Fullwidth 0
+    "１": "1"  # Fullwidth 1
+    "２": "2"  # Fullwidth 2
+    "３": "3"  # Fullwidth 3
+    "４": "4"  # Fullwidth 4
+    "５": "5"  # Fullwidth 5
+    "６": "6"  # Fullwidth 6
+    "７": "7"  # Fullwidth 7
+    "８": "8"  # Fullwidth 8
+    "９": "9"  # Fullwidth 9
+    "𝟎": "0"  # Mathematical double-struck 0
+    "𝟏": "1"  # Mathematical double-struck 1
+    "𝟐": "2"  # Mathematical double-struck 2
+    "𝟑": "3"  # Mathematical double-struck 3
+    "𝟒": "4"  # Mathematical double-struck 4
+    "𝟓": "5"  # Mathematical double-struck 5
+    "𝟔": "6"  # Mathematical double-struck 6
+    "𝟕": "7"  # Mathematical double-struck 7
+    "𝟖": "8"  # Mathematical double-struck 8
+    "𝟗": "9"  # Mathematical double-struck 9
+
+  # Ignored TLDs (don't flag as impersonation if domain uses these)
+  # These are often used legitimately for testing or personal sites
+  ignored_tlds:
+    - "local"
+    - "localhost"
+    - "test"
+    - "example"
+    - "invalid"
+
+  # Known infrastructure domains to exclude from impersonation checks
+  # (already filtered by ioc_filter, but added here for defense in depth)
+  infrastructure_domains:
+    - "outlook.com"
+    - "office365.com"
+    - "microsoftonline.com"
+    - "protection.outlook.com"
+    - "mail.protection.outlook.com"
+    - "prod.outlook.com"
+    - "google.com"
+    - "gmail.com"
+    - "googlemail.com"
+    - "yahoo.com"
+    - "hotmail.com"
+    - "live.com"
+    - "msn.com"
+    - "icloud.com"
+    - "me.com"
+    - "mac.com"
+    - "aol.com"
+    - "protonmail.com"
+    - "zoho.com"

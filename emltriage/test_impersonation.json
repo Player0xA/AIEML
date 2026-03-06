@@ -1,0 +1,107 @@
+{
+  "artifacts": {
+    "metadata": {
+      "run_id": "test-001",
+      "timestamp": "2026-03-05T10:00:00Z",
+      "input_filename": "test_phishing.eml",
+      "tool_name": "emltriage",
+      "tool_version": "0.1.0"
+    },
+    "headers": [],
+    "routing": [],
+    "authentication": {
+      "parsed_results": [],
+      "dkim_verified": false
+    },
+    "bodies": [],
+    "attachments": [],
+    "urls": [],
+    "iocs": [],
+    "impersonation": [
+      {
+        "brand_candidate": "Microsoft",
+        "detected_domain": "m1crosoft-security.com",
+        "technique": "typosquat",
+        "score": 0.92,
+        "severity": "critical",
+        "evidence_fields": [
+          "headers.From",
+          "urls.html_href"
+        ],
+        "algorithm": "weighted",
+        "source": "impersonation_detector",
+        "query": "m1crosoft-security.com vs Microsoft",
+        "timestamp": "2026-03-05T10:00:00Z",
+        "normalized_tokens": [
+          "m1crosoft",
+          "security",
+          "m1crosoft-security"
+        ],
+        "confidence": 1.0,
+        "cost": 0,
+        "explanation": "Domain 'm1crosoft-security.com' appears to be a typo-squat of 'Microsoft' (edit distance: 1)"
+      },
+      {
+        "brand_candidate": "PayPal",
+        "detected_domain": "paypa1-verification.net",
+        "technique": "homoglyph",
+        "score": 0.88,
+        "severity": "high",
+        "evidence_fields": [
+          "urls.html_href"
+        ],
+        "algorithm": "weighted",
+        "source": "impersonation_detector",
+        "query": "paypa1-verification.net vs PayPal",
+        "timestamp": "2026-03-05T10:00:00Z",
+        "normalized_tokens": [
+          "paypa1",
+          "verification",
+          "paypa1-verification"
+        ],
+        "confidence": 1.0,
+        "cost": 0,
+        "explanation": "Domain 'paypa1-verification.net' contains homoglyph characters resembling 'PayPal'"
+      },
+      {
+        "brand_candidate": "FONACOT",
+        "detected_domain": "fonacot-secure.mx",
+        "technique": "keyword_match",
+        "score": 0.76,
+        "severity": "high",
+        "evidence_fields": [
+          "headers.From"
+        ],
+        "algorithm": "weighted",
+        "source": "impersonation_detector",
+        "query": "fonacot-secure.mx vs FONACOT",
+        "timestamp": "2026-03-05T10:00:00Z",
+        "normalized_tokens": [
+          "fonacot",
+          "secure"
+        ],
+        "confidence": 0.95,
+        "cost": 0,
+        "explanation": "Domain 'fonacot-secure.mx' contains 'fonacot' but is not a legitimate FONACOT domain"
+      }
+    ],
+    "risk": {
+      "score": 75,
+      "severity": "high",
+      "reasons": [
+        {
+          "code": "impersonation_detected",
+          "description": "Potential brand impersonation detected (3 findings, 2 high confidence)",
+          "weight": 40,
+          "severity": "high",
+          "evidence_refs": [
+            "impersonation.0",
+            "impersonation.1",
+            "impersonation.2"
+          ]
+        }
+      ],
+      "confidence": 1.0
+    }
+  }
+}

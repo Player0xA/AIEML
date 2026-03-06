@@ -1,0 +1,175 @@
+{
+  "run_id": "541c6f07-5e5e-443d-8449-04442489448f",
+  "timestamp": "2026-03-05 04:07:16.622687+00:00",
+  "tool_version": "0.1.0",
+  "input_file": {
+    "path": "../I-332595 - \ud83d\udea8 Mensaje de verificaci\u00f3n de correo.eml",
+    "sha256": "653ab39c964da7af3177d828ef6cdd0e31448366351e124722729ecc3c3c006d",
+    "size": 212049,
+    "content_type": null
+  },
+  "output_files": [
+    {
+      "path": "../output/artifacts.json",
+      "sha256": "0d73fab38532d707eeb87d1dfc110fa266cb63fcd623619c8702492833a11d44",
+      "size": 47924,
+      "content_type": null
+    },
+    {
+      "path": "../output/iocs.json",
+      "sha256": "e3dfc6eeb3adffe4b8bc7b7dfac23db4a99bbaa9af50b71a18037cf6f39c1fe2",
+      "size": 13695,
+      "content_type": null
+    },
+    {
+      "path": "../output/auth_results.json",
+      "sha256": "20c38226f2f8879e601858e002ecd6142a786fd0ad9e29076c2aef0d9b5d4c01",
+      "size": 179,
+      "content_type": null
+    },
+    {
+      "path": "../output/report.md",
+      "sha256": "00ca2f7f5f4e648d17e8fc71c7e7e62152f3f45de2f321d2bc27cef205c0492a",
+      "size": 5243,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/58235329-8f9e-445e-b980-f828a0603391_image004.png",
+      "sha256": "f2af1e303ed2e48f120e587fab6e90d1cd561a3e035c1b656e15df2f5e8ee87d",
+      "size": 3532,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/6c09a309-0163-43cf-9bfa-446cd4fc7a52_image002.png",
+      "sha256": "0012a9262965e78c5dfd175263b0f4a47a45f0c1740dffa56a8245a831818dd9",
+      "size": 105360,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/a934fe08-bbc3-491d-8d6c-eed38dd8aac5_image005.png",
+      "sha256": "e724599ab33d945fa1fc19684275c142d8fdc8fecf32ff1997282550bc450783",
+      "size": 3967,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/f08e7f84-6992-49e0-8937-dc3ec14a790e_image001.png",
+      "sha256": "98f062abe564d250ce0f60f550bf9ed95ebb2fa3c267e096940c461f7e65607d",
+      "size": 2615,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/3bac961d-a2d1-40d5-8dbf-538d4e3add36_image001.png",
+      "sha256": "98f062abe564d250ce0f60f550bf9ed95ebb2fa3c267e096940c461f7e65607d",
+      "size": 2615,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/2bee4e56-7497-4693-b11e-48c7ab33ecc5_image001.png",
+      "sha256": "98f062abe564d250ce0f60f550bf9ed95ebb2fa3c267e096940c461f7e65607d",
+      "size": 2615,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/d2af486a-faf9-4c0e-8648-05688b6cb02e_image002.png",
+      "sha256": "0012a9262965e78c5dfd175263b0f4a47a45f0c1740dffa56a8245a831818dd9",
+      "size": 105360,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/832fbe64-4e59-408e-acef-d3b7c98359b6_image003.png",
+      "sha256": "b1902efa0d2806e35cfae69189bfab4097182c51f9f6228e5400a42665718902",
+      "size": 18986,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/1c4b3b87-c3fa-4d42-ab8e-8926d9d30540_image002.png",
+      "sha256": "0012a9262965e78c5dfd175263b0f4a47a45f0c1740dffa56a8245a831818dd9",
+      "size": 105360,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/bdeca212-8d45-4a10-9e30-10b397b4b882_image003.png",
+      "sha256": "b1902efa0d2806e35cfae69189bfab4097182c51f9f6228e5400a42665718902",
+      "size": 18986,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/69e3b9ee-8e6f-41fc-a6ed-1e392bb32fcb_image005.png",
+      "sha256": "e724599ab33d945fa1fc19684275c142d8fdc8fecf32ff1997282550bc450783",
+      "size": 3967,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/c5252866-5584-4d9b-9ed1-7cd3d4b0adab_image004.png",
+      "sha256": "f2af1e303ed2e48f120e587fab6e90d1cd561a3e035c1b656e15df2f5e8ee87d",
+      "size": 3532,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/01c67436-ce7d-4af5-9b45-5cbd354bd54e_image003.png",
+      "sha256": "b1902efa0d2806e35cfae69189bfab4097182c51f9f6228e5400a42665718902",
+      "size": 18986,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/b54c666f-6bec-4f09-92bd-7edd57ed6931_image002.png",
+      "sha256": "0012a9262965e78c5dfd175263b0f4a47a45f0c1740dffa56a8245a831818dd9",
+      "size": 105360,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/2cc1164a-7777-44d1-b66f-cad33ecaddbd_image005.png",
+      "sha256": "e724599ab33d945fa1fc19684275c142d8fdc8fecf32ff1997282550bc450783",
+      "size": 3967,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/44c13df3-9770-40e2-97a7-9e1cd3cbf631_image005.png",
+      "sha256": "e724599ab33d945fa1fc19684275c142d8fdc8fecf32ff1997282550bc450783",
+      "size": 3967,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/68799646-ee3d-4f8e-bf5f-c6157a91b6ac_image003.png",
+      "sha256": "b1902efa0d2806e35cfae69189bfab4097182c51f9f6228e5400a42665718902",
+      "size": 18986,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/98be9581-3a54-47d5-b651-83aa734c3d63_image004.png",
+      "sha256": "f2af1e303ed2e48f120e587fab6e90d1cd561a3e035c1b656e15df2f5e8ee87d",
+      "size": 3532,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/7f86b25e-0699-45b4-9723-f9aa2b357631_image004.png",
+      "sha256": "f2af1e303ed2e48f120e587fab6e90d1cd561a3e035c1b656e15df2f5e8ee87d",
+      "size": 3532,
+      "content_type": null
+    },
+    {
+      "path": "../output/attachments/e573b8e0-9107-453f-940d-79a0067eb85c_image001.png",
+      "sha256": "98f062abe564d250ce0f60f550bf9ed95ebb2fa3c267e096940c461f7e65607d",
+      "size": 2615,
+      "content_type": null
+    },
+    {
+      "path": "../output/body_2.html",
+      "sha256": "b5c9789f03403f184ae250270b5994c1852a3f38b0ef05ef688bcf07159a5f3a",
+      "size": 12098,
+      "content_type": null
+    },
+    {
+      "path": "../output/body_1.txt",
+      "sha256": "057aa7de2912e45c4a1164cd40e9332a6e9f7e223f8d0b7116de00cf692c1413",
+      "size": 702,
+      "content_type": null
+    }
+  ],
+  "parameters": {
+    "mode": "triage",
+    "offline": true,
+    "redact": false,
+    "dns": false
+  }
+}

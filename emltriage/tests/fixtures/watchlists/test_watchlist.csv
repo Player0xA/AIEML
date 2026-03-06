@@ -1,0 +1,7 @@
+ioc,ioc_type,list_type,description,tags,confidence
+go.microsoft.com,domain,allowlist,Microsoft domain,legitimate,1.0
+outlook.com,domain,allowlist,Microsoft Outlook,legitimate,1.0
+seg-gto.gob.mx,domain,allowlist,Government domain,legitimate,1.0
+evil-domain.com,domain,blocklist,Known malicious domain,malware,1.0
+phishing-site.xyz,domain,blocklist,Phishing domain,phishing,0.95
+192.168.1.100,ipv4,blocklist,Internal test IP,private,1.0

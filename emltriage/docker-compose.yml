@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  emltriage:
+    build: .
+    container_name: emltriage
+    volumes:
+      - ./data:/data
+      - ./output:/data/output
+      - ./watchlists:/data/watchlists
+    environment:
+      - EMLTRIAGE_AI_PROVIDER=ollama
+      - OLLAMA_BASE_URL=http://ollama:11434
+      # Optional API keys (add to .env file)
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      # - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
+      # - ABUSEIPDB_API_KEY=${ABUSEIPDB_API_KEY}
+    depends_on:
+      - ollama
+    networks:
+      - emltriage-network
+    command: analyze /data/suspicious.eml -o /data/output
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    volumes:
+      - ollama-data:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - emltriage-network
+    # Pull default model on start
+    entrypoint: >
+      sh -c "
+        ollama serve &
+        sleep 5
+        ollama pull llama3.1
+        wait
+      "
+
+volumes:
+  ollama-data:
+
+networks:
+  emltriage-network:
+    driver: bridge
