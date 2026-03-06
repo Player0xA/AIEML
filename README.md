@@ -8,7 +8,7 @@ emltriage is a powerful, evidence-first email analysis tool designed for Digital
 
 ### Option 1: One-Line Install (Recommended)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dfir/emltriage/main/install.sh | bash
+curl -fsSL [https://raw.githubusercontent.com/dfir/emltriage/main/install.sh](https://github.com/Player0xA/AIEML/blob/main/emltriage/install.sh) | bash
 ```
 
 ### Option 2: Manual Install with Makefile
