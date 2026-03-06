@@ -1,9 +1,0 @@
-{
-  "raw_headers": [],
-  "parsed_results": [],
-  "dkim_verified": null,
-  "dkim_verify_error": null,
-  "spf_dns_record": null,
-  "dmarc_dns_record": null,
-  "dns_queried": false
-}
