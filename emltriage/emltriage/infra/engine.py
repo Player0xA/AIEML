@@ -26,7 +26,7 @@ from emltriage.infra.asn import ASNLookup
 from emltriage.infra.rdap import DomainLookup
 from emltriage.infra.geo import GeoLookup
 from emltriage.infra.hosting import HostingDetector
-from emltriage.cti.cache import CacheManager
+from emltriage.cti.cache import CTICache as CacheManager
 from emltriage.utils.logging import get_logger
 
 logger = get_logger(__name__)

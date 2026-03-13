@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from emltriage.core.parser import parse_eml_file, create_iocs_json
 from emltriage.core.models import AnalysisMode
 from emltriage.cti import CTIEngine, CTIProviderType
+from emltriage.infra.robust_whois import RobustWhoisLookup, assess_domain
 
 
 app = FastAPI(title="emltriage Backend")
@@ -74,16 +75,6 @@ async def analyze_cti_fast(req: CTIFastRequest):
         dns_records = {}
         whois_data = {}
 
-        # Is it a structurally valid public internet domain?
-        def is_valid_domain(d):
-            # Must have at least one dot, not end with a dot, and end with a 2+ letter TLD
-            if not re.match(r"^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", d):
-                return False
-            # Block obviously internal/fake TLDs from whois
-            fake_tlds = {'.local', '.lan', '.internal', '.localhost', '.test', '.example', '.invalid', '.from', '.to', '.reply', '.macias'}
-            d_lower = d.lower()
-            return not any(d_lower.endswith(tld) for tld in fake_tlds)
-
         # Asynchronous DNS Dig
         async def fetch_dig(domain):
             domain = domain.strip()
@@ -110,120 +101,44 @@ async def analyze_cti_fast(req: CTIFastRequest):
             except Exception as e:
                 return domain, f"Dig Error: {e}"
 
-        # Asynchronous WHOIS with HTTP Fallback
+        # Asynchronous WHOIS with Multi-Layer Fallback
         async def fetch_whois(domain):
             domain = domain.strip()
             if not domain:
-                return domain, {"error": "Empty domain"}
+                return domain, {"error": "Empty domain", "registrar": "N/A", "creation": "N/A", "assessment": "Unknown"}
             
-            if not is_valid_domain(domain):
-                return domain, {"error": "Invalid or private top-level domain"}
-            
-            creation = "Unknown"
-            registrar = "Unknown"
-            whois_out = ""
-            
-            # Step 1: Try HTTP RDAP API first (Bypasses Port 43 blocks)
             try:
-                import httpx
-                async with httpx.AsyncClient(timeout=4.0) as client:
-                    resp = await client.get(f"https://rdap.org/domain/{domain}")
-                    if resp.status_code == 200:
-                        data = resp.json()
-                        whois_out = "Data retrieved via HTTP RDAP (Port 443)\n\n"
-                        
-                        # Extract Registrar
-                        for entity in data.get('entities', []):
-                            if 'registrar' in entity.get('roles', []):
-                                if entity.get('vcardArray'):
-                                    for vcard in entity['vcardArray'][1]:
-                                        if vcard[0] == 'fn':
-                                            registrar = vcard[3]
-                                            break
-                        
-                        # Extract Creation Date
-                        for event in data.get('events', []):
-                            if event.get('eventAction') == 'registration':
-                                creation = event.get('eventDate', '').split('T')[0]
-                                break
-                                
-                        whois_out += f"Registrar: {registrar}\nCreation Date: {creation}\n"
-                        whois_out += f"Raw RDAP Response snippet: {str(data)[:200]}..."
-            except Exception as e:
-                # HTTP Failed, proceed to Step 2
-                pass
-            
-            # Step 2: If HTTP RDAP didn't find the answers, fallback to Native WHOIS (Port 43)
-            if registrar == "Unknown":
-                try:
-                    proc = await asyncio.create_subprocess_exec(
-                        'whois', domain,
-                        stdout=asyncio.subprocess.PIPE,
-                        stderr=asyncio.subprocess.PIPE
-                    )
-                    try:
-                        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=5.0)
-                    except asyncio.TimeoutError:
-                        proc.kill()
+                async with RobustWhoisLookup(timeout=5.0) as lookup:
+                    result = await lookup.lookup(domain)
+                    
+                    if result.error:
                         return domain, {
-                            "creation": "Timeout/Blocked", 
-                            "registrar": "Timeout/Blocked", 
-                            "assessment": "Unknown (Port 43 Blocked)",
-                            "raw": "WHOIS lookup timed out. Port 43 outbound traffic may be blocked on this network, and the HTTP RDAP fallback failed."
+                            "error": result.error,
+                            "registrar": result.registrar,
+                            "creation": result.creation_date,
+                            "assessment": result.assessment,
+                            "raw": result.raw,
+                            "source": result.source
                         }
-                        
-                    whois_out = stdout.decode('utf-8', errors='replace')
                     
-                    # Check if WHOIS indicates no match or error
-                    if 'No match for' in whois_out or 'NOT FOUND' in whois_out or 'No Data Found' in whois_out:
-                         return domain, {
-                            "creation": "N/A", 
-                            "registrar": "N/A", 
-                            "assessment": "Unknown (Not Found)",
-                            "raw": whois_out
-                         }
+                    assessment = assess_domain(result.registrar, result.creation_date, domain)
                     
-                    for line in whois_out.split('\n'):
-                        line_l = line.lower()
-                        if ('creation date:' in line_l or 'created:' in line_l or 'registered on:' in line_l) and creation == "Unknown":
-                            date_match = re.search(r'\d{4}-\d{2}-\d{2}', line_l)
-                            if date_match:
-                                creation = date_match.group(0)
-                            else:
-                                parts = line.split(':', 1)
-                                if len(parts) > 1 and len(parts[1].strip()) < 30:
-                                    creation = parts[1].strip()
-                        elif ('registrar:' in line_l or 'registrar name:' in line_l) and registrar == "Unknown":
-                            parts = line.split(':', 1)
-                            if len(parts) > 1 and len(parts[1].strip()) < 100:
-                                registrar = parts[1].strip()
-                except Exception as e:
-                    return domain, {"error": str(e)}
-            
-            # Step 3: Run Assessment logic on whatever data we found
-            assessment = "Neutral"
-            brand_keywords = ['microsoft', 'office', 'google', 'apple', 'login', 'secure', 'verify', 'update', 'account', 'admin']
-            enterprise_registrars = ['markmonitor', 'csc corporate domains', 'amazon', 'google', 'cloudflare']
-            
-            reg_lower = registrar.lower()
-            dom_lower = domain.lower()
-            
-            has_brand = any(kw in dom_lower for kw in brand_keywords)
-            is_enterprise = any(ent in reg_lower for ent in enterprise_registrars)
-            
-            if has_brand and not is_enterprise and registrar != "Unknown":
-                assessment = "Suspicious (Brand Impersonation)"
-            elif is_enterprise:
-                assessment = "Legitimate (Enterprise Registrar)"
-            elif '2024' in creation or '2025' in creation or '2026' in creation:
-                assessment = "Suspicious (Newly Registered)"
-                
-            return domain, {
-                "creation": creation, 
-                "registrar": registrar, 
-                "assessment": assessment,
-                "raw": whois_out
-            }
+                    return domain, {
+                        "registrar": result.registrar,
+                        "creation": result.creation_date,
+                        "assessment": assessment,
+                        "raw": result.raw,
+                        "source": result.source,
+                        "error": None
+                    }
+            except Exception as e:
+                return domain, {
+                    "error": f"Lookup failed: {str(e)}",
+                    "registrar": "Unknown",
+                    "creation": "Unknown",
+                    "assessment": "Unknown",
+                    "raw": ""
+                }
 
         domains_to_check = [d.strip() for d in req.domains if d.strip()]
         
