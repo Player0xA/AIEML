@@ -17,6 +17,7 @@ from emltriage.core.extract.headers import extract_headers, get_all_header_value
 from emltriage.core.extract.iocs import extract_all_iocs
 from emltriage.core.extract.received import parse_received_headers
 from emltriage.core.extract.urls import extract_all_urls
+from emltriage.core.msg_parser import parse_msg_file
 from emltriage.core.models import (
     AnalysisMode,
     Artifacts,
@@ -42,10 +43,10 @@ def parse_eml_file(
     excluded_brands: Optional[list[str]] = None,
     skip_impersonation: bool = False,
 ) -> Artifacts:
-    """Parse an EML file and extract all artifacts.
+    """Parse an email file (.eml or .msg) and extract all artifacts.
     
     Args:
-        file_path: Path to .eml file
+        file_path: Path to .eml or .msg file
         output_dir: Directory for output files
         mode: Analysis mode (triage or deep)
         offline: Whether to run in offline mode
@@ -59,8 +60,35 @@ def parse_eml_file(
     Returns:
         Artifacts object with all extracted data
     """
-    logger.info(f"Parsing EML file: {file_path}")
+    logger.info(f"Parsing email file: {file_path}")
     
+    # Route based on file extension
+    is_msg = file_path.suffix.lower() == '.msg'
+    
+    if is_msg:
+        # Check for OLE magic bytes just to be sure
+        try:
+            with open(file_path, "rb") as f:
+                header = f.read(8)
+                if not header.startswith(b"\xd0\xcf\x11\xe0"):
+                    logger.warning("File has .msg extension but missing OLE magic header.")
+        except IOError:
+            pass
+            
+        return parse_msg_file(
+            file_path=file_path,
+            output_dir=output_dir,
+            mode=mode,
+            offline=offline,
+            redact=redact,
+            perform_dns_lookup=perform_dns_lookup,
+            brand_config_path=brand_config_path,
+            impersonation_algorithm=impersonation_algorithm,
+            excluded_brands=excluded_brands,
+            skip_impersonation=skip_impersonation
+        )
+        
+    # Standard EML Parsing
     # Read raw bytes for hashing
     raw_bytes = file_path.read_bytes()
     input_hash = hashlib.sha256(raw_bytes).hexdigest()

@@ -1,0 +1,143 @@
+"""Word document (.docx) report generation."""
+
+from pathlib import Path
+from typing import Optional
+
+from docx import Document
+from docx.shared import Inches, Pt, RGBColor
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+
+from emltriage.core.models import Artifacts
+from emltriage.utils.logging import get_logger
+
+logger = get_logger(__name__)
+
+def add_heading(document: Document, text: str, level: int = 1):
+    heading = document.add_heading(text, level=level)
+    # Customize heading style if desired
+    return heading
+
+def generate_docx_report(artifacts: Artifacts, output_path: Path, ai_summary: Optional[str] = None) -> None:
+    """Generate Word Document (.docx) report.
+    
+    Args:
+        artifacts: Email artifacts
+        output_path: Where to save the generated document
+        ai_summary: Optional AI-generated summary to include at the start
+    """
+    logger.info(f"Generating DOCX report: {output_path}")
+    
+    doc = Document()
+    
+    # Title
+    title = doc.add_heading(f"Email Analysis Report", 0)
+    title.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    
+    # AI Summary Section
+    if ai_summary:
+        add_heading(doc, "AI Threat Narrative", level=1)
+        p = doc.add_paragraph(ai_summary)
+        p.runs[0].font.name = "Arial"
+        doc.add_page_break()
+    
+    # Case Metadata
+    add_heading(doc, "Case Metadata", level=1)
+    
+    table = doc.add_table(rows=8, cols=2)
+    table.style = 'Table Grid'
+    
+    def set_row(idx, key, value):
+        table.cell(idx, 0).text = str(key)
+        table.cell(idx, 0).paragraphs[0].runs[0].bold = True
+        table.cell(idx, 1).text = str(value)
+        
+    set_row(0, "Run ID", artifacts.metadata.run_id)
+    set_row(1, "Analysis Date", artifacts.metadata.timestamp.isoformat())
+    set_row(2, "Input File", artifacts.metadata.input_filename)
+    set_row(3, "Input SHA256", artifacts.metadata.input_hash_sha256)
+    set_row(4, "Input Size", f"{artifacts.metadata.input_size} bytes")
+    set_row(5, "Analysis Mode", artifacts.metadata.analysis_mode.value)
+    set_row(6, "Offline Mode", str(artifacts.metadata.offline_mode))
+    set_row(7, "Redacted", str(artifacts.metadata.redact_mode))
+    
+    doc.add_paragraph()
+    
+    # Risk Assessment
+    add_heading(doc, "Risk Assessment", level=1)
+    
+    p = doc.add_paragraph()
+    p.add_run("Score: ").bold = True
+    p.add_run(f"{artifacts.risk.score}/100")
+    
+    p = doc.add_paragraph()
+    p.add_run("Severity: ").bold = True
+    severity_run = p.add_run(artifacts.risk.severity.value.upper())
+    
+    # Color severity
+    val = artifacts.risk.severity.value.lower()
+    if val == "critical":
+        severity_run.font.color.rgb = RGBColor(0xFF, 0x00, 0x00)
+    elif val == "high":
+        severity_run.font.color.rgb = RGBColor(0xFF, 0x8C, 0x00)
+    elif val == "medium":
+        severity_run.font.color.rgb = RGBColor(0xFF, 0xD7, 0x00)
+    else:
+        severity_run.font.color.rgb = RGBColor(0x00, 0x80, 0x00)
+        
+    if artifacts.risk.reasons:
+        add_heading(doc, "Risk Factors", level=2)
+        for reason in artifacts.risk.reasons:
+            p = doc.add_paragraph(style='List Bullet')
+            p.add_run(f"{reason.code} ({reason.severity.value}): ").bold = True
+            p.add_run(reason.description)
+            
+            p_sub = doc.add_paragraph(style='List Bullet 2')
+            p_sub.add_run(f"Weight: {reason.weight} | Evidence: {', '.join(reason.evidence_refs)}")
+
+    doc.add_paragraph()
+    
+    # Headers
+    add_heading(doc, "Headers Summary", level=1)
+    important_headers = ['from', 'to', 'subject', 'date', 'message-id']
+    for header_name in important_headers:
+        for header in artifacts.headers:
+            if header.name.lower() == header_name:
+                value = header.decoded_value or header.raw_value
+                p = doc.add_paragraph()
+                p.add_run(f"{header.name}: ").bold = True
+                p.add_run(value)
+                break
+                
+    doc.add_page_break()
+
+    # IOCs
+    if artifacts.iocs:
+        add_heading(doc, "Indicators of Compromise (IOCs)", level=1)
+        
+        # Group by type
+        iocs_by_type = {}
+        for ioc in artifacts.iocs:
+            ioc_type = ioc.type.value
+            if ioc_type not in iocs_by_type:
+                iocs_by_type[ioc_type] = []
+            iocs_by_type[ioc_type].append(ioc)
+        
+        for ioc_type, iocs in sorted(iocs_by_type.items()):
+            add_heading(doc, ioc_type.upper(), level=2)
+            for ioc in iocs[:20]:
+                p = doc.add_paragraph(style='List Bullet')
+                p.add_run(ioc.value).bold = True
+                p.add_run(f" (Source: {ioc.source})")
+            if len(iocs) > 20:
+                doc.add_paragraph(f"... and {len(iocs) - 20} more", style='List Continue')
+
+    # Footer/note
+    doc.add_paragraph()
+    doc.add_paragraph("---")
+    note = doc.add_paragraph("Generated by emltriage")
+    note.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    note.runs[0].font.italic = True
+    
+    # Save document
+    doc.save(str(output_path))
+    logger.info("DOCX report saved successfully")

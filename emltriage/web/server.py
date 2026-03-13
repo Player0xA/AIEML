@@ -18,8 +18,8 @@ BASE_DIR = Path(__file__).parent.absolute()
 
 @app.post("/api/analyze")
 async def analyze_eml(file: UploadFile = File(...), vt_api_key: str = Form(None)):
-    if not file.filename.endswith('.eml'):
-        raise HTTPException(status_code=400, detail="Only .eml files are supported")
+    if not file.filename.endswith(('.eml', '.msg')):
+        raise HTTPException(status_code=400, detail="Only .eml or .msg files are supported")
 
     # Create a temporary directory for analysis
     with tempfile.TemporaryDirectory() as tmp_dir:
@@ -60,135 +60,231 @@ async def analyze_eml(file: UploadFile = File(...), vt_api_key: str = Form(None)
             traceback.print_exc()
             raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
-@app.post("/api/analyze/cti")
-async def analyze_eml_cti(file: UploadFile = File(...), vt_api_key: str = Form(None)):
-    if not file.filename.endswith('.eml'):
-        raise HTTPException(status_code=400, detail="Only .eml files are supported")
+from pydantic import BaseModel
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        tmp_path = Path(tmp_dir)
-        eml_path = tmp_path / file.filename
-        output_path = tmp_path / "output"
-        output_path.mkdir()
+class CTIFastRequest(BaseModel):
+    domains: list[str]
 
-        with open(eml_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+@app.post("/api/cti/fast")
+async def analyze_cti_fast(req: CTIFastRequest):
+    try:
+        import asyncio
+        import re
 
-        try:
-            artifacts = parse_eml_file(
-                file_path=eml_path,
-                output_dir=output_path,
-                mode=AnalysisMode.TRIAGE,
-                offline=True,
-                redact=False,
-                perform_dns_lookup=False
-            )
-            iocs = create_iocs_json(artifacts, filter_infrastructure=True)
+        dns_records = {}
+        whois_data = {}
 
-            response_data = {}
-            if vt_api_key:
-                os.environ["VIRUSTOTAL_API_KEY"] = vt_api_key
-                engine = CTIEngine(offline=False, providers=[CTIProviderType.VIRUSTOTAL])
-                
-                # Cap VT lookups
-                import copy
-                vt_iocs = copy.deepcopy(iocs)
-                
-                # Prioritize IOCs from the body/attachments over routing headers
-                def sort_iocs(ioc_list):
-                    score_map = {'body_html': 0, 'body_plain': 0, 'attachments': 1, 'headers': 2}
-                    return sorted(ioc_list, key=lambda ioc: score_map.get(getattr(ioc, 'source', ''), 3))
+        # Is it a structurally valid public internet domain?
+        def is_valid_domain(d):
+            # Must have at least one dot, not end with a dot, and end with a 2+ letter TLD
+            if not re.match(r"^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", d):
+                return False
+            # Block obviously internal/fake TLDs from whois
+            fake_tlds = {'.local', '.lan', '.internal', '.localhost', '.test', '.example', '.invalid', '.from', '.to', '.reply', '.macias'}
+            d_lower = d.lower()
+            return not any(d_lower.endswith(tld) for tld in fake_tlds)
 
-                # Filter out obvious safe/routing infrastructure domains to save VT quota
-                safe_infra = ['namprd', 'outlook.com', 'schemas.microsoft.com', 'w3.org', 'protection.outlook.com']
-                
-                vt_iocs.domains = [d for d in vt_iocs.domains if not d.value.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.svg')) and not any(safe in d.value.lower() for safe in safe_infra)]
-                vt_iocs.urls = [u for u in vt_iocs.urls if not u.value.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.svg')) and not any(safe in u.value.lower() for safe in safe_infra)]
-                
-                vt_iocs.domains = sort_iocs(vt_iocs.domains)[:3]
-                vt_iocs.ips = sort_iocs(vt_iocs.ips)[:2]
-                vt_iocs.urls = sort_iocs(vt_iocs.urls)[:2]
-                vt_iocs.hashes = vt_iocs.hashes[:0]
-
+        # Asynchronous DNS Dig
+        async def fetch_dig(domain):
+            domain = domain.strip()
+            if not domain:
+                return domain, "Empty domain"
+            try:
+                proc = await asyncio.create_subprocess_exec(
+                    'dig', '+short', 'A', domain,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE
+                )
                 try:
-                    enrichments = engine.enrich_iocs(vt_iocs)
-                    cti_data = enrichments.model_dump(mode='json')
-                except Exception as cti_err:
-                    print(f"WARN: CTI Enrichment failed: {cti_err}")
-                    cti_data = {"summary": {}, "enrichments": []}
-
-                import socket
-                import subprocess
-
-                dns_records = {}
-                whois_data = {}
+                    stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=3.0)
+                except asyncio.TimeoutError:
+                    proc.kill()
+                    return domain, "Dig timeout"
                 
-                for d in vt_iocs.domains:
-                    domain = d.value.strip()
+                out = stdout.decode('utf-8').strip()
+                if out:
+                    # dig +short can return multiple lines like aliases then IPs, let's format nicely
+                    lines = [ln.strip() for ln in out.split('\n') if ln.strip()]
+                    return domain, " | ".join(lines)
+                return domain, "No A Record"
+            except Exception as e:
+                return domain, f"Dig Error: {e}"
+
+        # Asynchronous WHOIS with HTTP Fallback
+        async def fetch_whois(domain):
+            domain = domain.strip()
+            if not domain:
+                return domain, {"error": "Empty domain"}
+            
+            if not is_valid_domain(domain):
+                return domain, {"error": "Invalid or private top-level domain"}
+            
+            creation = "Unknown"
+            registrar = "Unknown"
+            whois_out = ""
+            
+            # Step 1: Try HTTP RDAP API first (Bypasses Port 43 blocks)
+            try:
+                import httpx
+                async with httpx.AsyncClient(timeout=4.0) as client:
+                    resp = await client.get(f"https://rdap.org/domain/{domain}")
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        whois_out = "Data retrieved via HTTP RDAP (Port 443)\n\n"
+                        
+                        # Extract Registrar
+                        for entity in data.get('entities', []):
+                            if 'registrar' in entity.get('roles', []):
+                                if entity.get('vcardArray'):
+                                    for vcard in entity['vcardArray'][1]:
+                                        if vcard[0] == 'fn':
+                                            registrar = vcard[3]
+                                            break
+                        
+                        # Extract Creation Date
+                        for event in data.get('events', []):
+                            if event.get('eventAction') == 'registration':
+                                creation = event.get('eventDate', '').split('T')[0]
+                                break
+                                
+                        whois_out += f"Registrar: {registrar}\nCreation Date: {creation}\n"
+                        whois_out += f"Raw RDAP Response snippet: {str(data)[:200]}..."
+            except Exception as e:
+                # HTTP Failed, proceed to Step 2
+                pass
+            
+            # Step 2: If HTTP RDAP didn't find the answers, fallback to Native WHOIS (Port 43)
+            if registrar == "Unknown":
+                try:
+                    proc = await asyncio.create_subprocess_exec(
+                        'whois', domain,
+                        stdout=asyncio.subprocess.PIPE,
+                        stderr=asyncio.subprocess.PIPE
+                    )
                     try:
-                        dns_records[domain] = socket.gethostbyname(domain)
-                    except Exception as e:
-                        dns_records[domain] = f"Error: {e}"
-                    
-                    try:
-                        proc = subprocess.run(['whois', domain], capture_output=True, text=True, timeout=5)
-                        whois_out = proc.stdout
-                        creation = "Unknown"
-                        registrar = "Unknown"
-                        for line in whois_out.split('\\n'):
-                            line_l = line.lower()
-                            # Use regex for creation date to avoid grabbing full Verisign server string blobs
-                            if ('creation date:' in line_l or 'created:' in line_l) and creation == "Unknown":
-                                import re
-                                date_match = re.search(r'\d{4}-\d{2}-\d{2}', line_l)
-                                if date_match:
-                                    creation = date_match.group(0)
-                                else:
-                                    # Fallback if no strict YYYY-MM-DD
-                                    parts = line.split(':', 1)
-                                    if len(parts) > 1 and len(parts[1].strip()) < 30:
-                                        creation = parts[1].strip()
-                            elif 'registrar:' in line_l and registrar == "Unknown":
-                                parts = line.split(':', 1)
-                                if len(parts) > 1 and len(parts[1].strip()) < 100:
-                                    registrar = parts[1].strip()
-                        
-                        # Deterministic WHOIS Assessment Heuristic
-                        assessment = "Neutral"
-                        brand_keywords = ['microsoft', 'office', 'google', 'apple', 'login', 'secure', 'verify', 'update', 'account', 'admin']
-                        enterprise_registrars = ['markmonitor', 'csc corporate domains', 'amazon', 'google']
-                        
-                        reg_lower = registrar.lower()
-                        dom_lower = domain.lower()
-                        
-                        has_brand = any(kw in dom_lower for kw in brand_keywords)
-                        is_enterprise = any(ent in reg_lower for ent in enterprise_registrars)
-                        
-                        if has_brand and not is_enterprise and registrar != "Unknown":
-                            assessment = "Suspicious (Brand Impersonation)"
-                        elif is_enterprise:
-                            assessment = "Legitimate (Enterprise Registrar)"
-                        elif '2024' in creation or '2025' in creation or '2026' in creation:
-                            assessment = "Suspicious (Newly Registered)"
-                            
-                        whois_data[domain] = {
-                            "creation": creation, 
-                            "registrar": registrar, 
-                            "assessment": assessment,
-                            "raw": whois_out
+                        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=5.0)
+                    except asyncio.TimeoutError:
+                        proc.kill()
+                        return domain, {
+                            "creation": "Timeout/Blocked", 
+                            "registrar": "Timeout/Blocked", 
+                            "assessment": "Unknown (Port 43 Blocked)",
+                            "raw": "WHOIS lookup timed out. Port 43 outbound traffic may be blocked on this network, and the HTTP RDAP fallback failed."
                         }
-                    except Exception as e:
-                        whois_data[domain] = {"error": str(e)}
+                        
+                    whois_out = stdout.decode('utf-8', errors='replace')
+                    
+                    # Check if WHOIS indicates no match or error
+                    if 'No match for' in whois_out or 'NOT FOUND' in whois_out or 'No Data Found' in whois_out:
+                         return domain, {
+                            "creation": "N/A", 
+                            "registrar": "N/A", 
+                            "assessment": "Unknown (Not Found)",
+                            "raw": whois_out
+                         }
+                    
+                    for line in whois_out.split('\n'):
+                        line_l = line.lower()
+                        if ('creation date:' in line_l or 'created:' in line_l or 'registered on:' in line_l) and creation == "Unknown":
+                            date_match = re.search(r'\d{4}-\d{2}-\d{2}', line_l)
+                            if date_match:
+                                creation = date_match.group(0)
+                            else:
+                                parts = line.split(':', 1)
+                                if len(parts) > 1 and len(parts[1].strip()) < 30:
+                                    creation = parts[1].strip()
+                        elif ('registrar:' in line_l or 'registrar name:' in line_l) and registrar == "Unknown":
+                            parts = line.split(':', 1)
+                            if len(parts) > 1 and len(parts[1].strip()) < 100:
+                                registrar = parts[1].strip()
+                except Exception as e:
+                    return domain, {"error": str(e)}
+            
+            # Step 3: Run Assessment logic on whatever data we found
+            assessment = "Neutral"
+            brand_keywords = ['microsoft', 'office', 'google', 'apple', 'login', 'secure', 'verify', 'update', 'account', 'admin']
+            enterprise_registrars = ['markmonitor', 'csc corporate domains', 'amazon', 'google', 'cloudflare']
+            
+            reg_lower = registrar.lower()
+            dom_lower = domain.lower()
+            
+            has_brand = any(kw in dom_lower for kw in brand_keywords)
+            is_enterprise = any(ent in reg_lower for ent in enterprise_registrars)
+            
+            if has_brand and not is_enterprise and registrar != "Unknown":
+                assessment = "Suspicious (Brand Impersonation)"
+            elif is_enterprise:
+                assessment = "Legitimate (Enterprise Registrar)"
+            elif '2024' in creation or '2025' in creation or '2026' in creation:
+                assessment = "Suspicious (Newly Registered)"
+                
+            return domain, {
+                "creation": creation, 
+                "registrar": registrar, 
+                "assessment": assessment,
+                "raw": whois_out
+            }
 
-                cti_data["dns_records"] = dns_records
-                cti_data["whois"] = whois_data
-                response_data["cti"] = cti_data
+        domains_to_check = [d.strip() for d in req.domains if d.strip()]
+        
+        # Fire both dig and whois concurrently for all domains
+        dns_results, whois_results = await asyncio.gather(
+            asyncio.gather(*(fetch_dig(d) for d in domains_to_check)),
+            asyncio.gather(*(fetch_whois(d) for d in domains_to_check))
+        )
+        
+        for domain, result in dns_results:
+            dns_records[domain] = result
+            
+        for domain, data in whois_results:
+            whois_data[domain] = data
 
-            return JSONResponse(content=response_data)
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            raise HTTPException(status_code=500, detail=f"CTI Analysis failed: {str(e)}")
+        return JSONResponse(content={"dns_records": dns_records, "whois": whois_data})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Fast CTI failed: {str(e)}")
+
+class CTIVTRequest(BaseModel):
+    vt_api_key: str
+    domains: list[str]
+    ips: list[str]
+    urls: list[str]
+
+@app.post("/api/cti/vt")
+async def analyze_cti_vt(req: CTIVTRequest):
+    try:
+        import os
+        from emltriage.cti import CTIEngine, CTIProviderType
+        from emltriage.core.models import IOCsExtracted, IOCEntry, IOCType
+        
+        os.environ["VIRUSTOTAL_API_KEY"] = req.vt_api_key
+        engine = CTIEngine(offline=False, providers=[CTIProviderType.VIRUSTOTAL])
+        
+        import uuid
+        vt_iocs = IOCsExtracted(
+            run_id=uuid.uuid4().hex,
+            domains=[IOCEntry(type=IOCType.DOMAIN, value=d, source='web', evidence_ref='web', first_seen_in='web') for d in req.domains],
+            ips=[IOCEntry(type=IOCType.IP, value=i, source='web', evidence_ref='web', first_seen_in='web') for i in req.ips],
+            urls=[IOCEntry(type=IOCType.URL, value=u, source='web', evidence_ref='web', first_seen_in='web') for u in req.urls],
+            emails=[],
+            hashes=[],
+            filenames=[],
+            infrastructure=[]
+        )
+        
+        try:
+            enrichments = engine.enrich_iocs(vt_iocs)
+            cti_data = enrichments.model_dump(mode='json')
+        except Exception as cti_err:
+            print(f"WARN: CTI Enrichment failed: {cti_err}")
+            cti_data = {"summary": {}, "enrichments": []}
+
+        return JSONResponse(content={"enrichments": cti_data.get("enrichments", [])})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"VT CTI failed: {str(e)}")
 
 
 from pydantic import BaseModel
@@ -199,6 +295,54 @@ class AISummaryRequest(BaseModel):
     model: str
     prompt: str
     length: str = 'medium'
+
+class DocxExportRequest(BaseModel):
+    artifacts: dict
+    ai_summary: str = None
+    auto_open: bool = False
+
+@app.post("/api/export/docx")
+async def export_docx(req: DocxExportRequest):
+    try:
+        from emltriage.core.models import Artifacts
+        from emltriage.reporting.docx import generate_docx_report
+        import typing
+        from fastapi.responses import FileResponse
+        import uuid
+        import os
+        import sys
+        import subprocess
+
+        artifacts = Artifacts.model_validate(req.artifacts)
+        
+        # Save to a dedicated output folder (or temp)
+        case_dir = Path.home() / "emltriage_cases"
+        case_dir.mkdir(parents=True, exist_ok=True)
+        
+        run_id = artifacts.metadata.run_id or str(uuid.uuid4())
+        filename = artifacts.metadata.input_filename or "email"
+        
+        out_path = case_dir / f"Report_{filename}_{run_id}.docx"
+        generate_docx_report(artifacts, out_path, req.ai_summary)
+        
+        if req.auto_open:
+            if sys.platform == "darwin":
+                subprocess.call(["open", str(out_path)])
+            elif sys.platform == "win32":
+                os.startfile(str(out_path))
+            else:
+                subprocess.call(["xdg-open", str(out_path)])
+                
+        # Return file for download
+        return FileResponse(
+            path=out_path,
+            media_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            filename=f"Report_{filename}.docx"
+        )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
 @app.post("/api/ai/summarize")
 async def summarize_eml(req: AISummaryRequest):

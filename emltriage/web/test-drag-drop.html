@@ -20,7 +20,7 @@
 <body>
     <h1>Drag-and-Drop File Detection Test</h1>
     <div id="dropZone" class="drop-zone">
-        <p>Drop .eml or .json files here to test detection</p>
+        <p>Drop .eml, .msg, or .json files here to test detection</p>
         <p><small>Try dropping the EML file from the project directory</small></p>
     </div>
     <div id="log" class="log"></div>
@@ -42,7 +42,7 @@
             addLog(`Received ${fileList.length} file(s)`);
             
             const jsonFiles = fileList.filter(f => f.name.endsWith('.json'));
-            const emlFiles = fileList.filter(f => f.name.endsWith('.eml'));
+            const emlFiles = fileList.filter(f => f.name.toLowerCase().endsWith('.eml') || f.name.toLowerCase().endsWith('.msg'));
             
             addLog(`  JSON files: ${jsonFiles.length}`, 'success');
             addLog(`  EML files: ${emlFiles.length}`, emlFiles.length > 0 ? 'error' : 'success');
@@ -88,7 +88,7 @@
             const input = document.createElement('input');
             input.type = 'file';
             input.multiple = true;
-            input.accept = '.json,.eml';
+            input.accept = '.json,.eml,.msg';
             input.onchange = (e) => {
                 addLog('File picker triggered');
                 handleFiles(e.target.files);

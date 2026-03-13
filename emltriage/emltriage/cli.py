@@ -29,7 +29,7 @@ logger = get_logger(__name__)
 
 @app.command()
 def analyze(
-    eml_file: Path = typer.Argument(..., help="Path to .eml file"),
+    eml_file: Path = typer.Argument(..., help="Path to .eml or .msg file"),
     output: Path = typer.Option(..., "--output", "-o", help="Output directory"),
     mode: AnalysisMode = typer.Option(
         AnalysisMode.TRIAGE,
@@ -96,8 +96,8 @@ def analyze(
         console.print(f"[red]Error: File not found: {eml_file}[/red]")
         raise typer.Exit(1)
     
-    if not eml_file.suffix.lower() == '.eml':
-        console.print(f"[yellow]Warning: File does not have .eml extension: {eml_file}[/yellow]")
+    if not eml_file.suffix.lower() in ['.eml', '.msg']:
+        console.print(f"[yellow]Warning: File does not have .eml or .msg extension: {eml_file}[/yellow]")
     
     # Create output directory
     output.mkdir(parents=True, exist_ok=True)
@@ -243,17 +243,19 @@ def batch(
     configure_logging(level="DEBUG" if verbose else "INFO")
     
     # Find files
+    eml_files = []
     if input_path.is_dir():
-        eml_files = list(input_path.glob("**/*.eml"))
+        eml_files.extend(input_path.glob("**/*.eml"))
+        eml_files.extend(input_path.glob("**/*.msg"))
     else:
         # Treat as glob pattern
         eml_files = list(Path.cwd().glob(str(input_path)))
     
     if not eml_files:
-        console.print("[red]No .eml files found[/red]")
+        console.print("[red]No .eml or .msg files found[/red]")
         raise typer.Exit(1)
     
-    console.print(f"[cyan]Found {len(eml_files)} EML files[/cyan]")
+    console.print(f"[cyan]Found {len(eml_files)} email files[/cyan]")
     
     # Process each file
     results = []

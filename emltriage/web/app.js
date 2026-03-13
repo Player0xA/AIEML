@@ -490,6 +490,68 @@ function initializeEventListeners() {
     });
   }
 
+  // DOCX export modal
+  const btnGenDocx = document.getElementById('btn-generate-docx');
+  if (btnGenDocx) {
+    btnGenDocx.addEventListener('click', async () => {
+      const summary = document.getElementById('docx-ai-summary').value;
+      const autoOpen = document.getElementById('docx-auto-open').checked;
+      document.getElementById('docx-export-modal').classList.add('hidden');
+      
+      showToast('Generating DOCX report...', 'info');
+      try {
+        const response = await fetch('/api/export/docx', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            artifacts: state.data.artifacts,
+            ai_summary: summary,
+            auto_open: autoOpen
+          })
+        });
+        
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.detail || 'Failed to generate report');
+        }
+        
+        // Handle file download
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const filename = state.data.artifacts?.metadata?.input_filename || 'email';
+        a.download = `Report_${filename.replace(/[^a-z0-9]/gi, '_')}.docx`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        showToast('DOCX report generated successfully', 'success');
+      } catch (err) {
+        showToast(`Export error: ${err.message}`, 'error');
+        console.error('Docx export failed:', err);
+      }
+    });
+  }
+  
+  const btnCancelDocx = document.getElementById('btn-cancel-docx');
+  if (btnCancelDocx) {
+    btnCancelDocx.addEventListener('click', () => {
+      document.getElementById('docx-export-modal').classList.add('hidden');
+    });
+  }
+  
+  const docxModal = document.getElementById('docx-export-modal');
+  if (docxModal) {
+    docxModal.querySelector('.close-modal')?.addEventListener('click', () => {
+      docxModal.classList.add('hidden');
+    });
+    docxModal.addEventListener('click', (e) => {
+      if (e.target === docxModal) {
+        docxModal.classList.add('hidden');
+      }
+    });
+  }
+
   // Visibility change (pause canvas)
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
@@ -506,7 +568,7 @@ function handleFiles(files) {
 
   // Separate JSON and EML files
   const jsonFiles = fileList.filter(f => f.name.endsWith('.json'));
-  const emlFiles = fileList.filter(f => f.name.endsWith('.eml'));
+  const emlFiles = fileList.filter(f => f.name.toLowerCase().endsWith('.eml') || f.name.toLowerCase().endsWith('.msg'));
 
   // Handle EML files - upload to backend
   if (emlFiles.length > 0) {
@@ -591,9 +653,7 @@ async function uploadEML(file) {
     showToast('Analysis complete', 'success');
 
     // Background async CTI Enrichment
-    if (state.apiKeys.vt) {
-      fetchCTIAsync(file, state.apiKeys.vt);
-    }
+    fetchCTIAsync();
 
   } catch (err) {
     showToast(`Backend error: ${err.message}`, 'error');
@@ -602,33 +662,71 @@ async function uploadEML(file) {
   }
 }
 
-async function fetchCTIAsync(file, vtKey) {
+async function fetchCTIAsync() {
+  if (!state.data || (!state.data.iocs && !state.data.artifacts?.iocs)) return;
+
+  const rawIocs = state.data.iocs || state.data.artifacts.iocs;
+  const iocList = Array.isArray(rawIocs) ? rawIocs : [
+    ...(rawIocs.domains || []),
+    ...(rawIocs.ips || []),
+    ...(rawIocs.urls || [])
+  ];
+
+  if (!iocList || iocList.length === 0) return;
+
+  if (!state.data.cti) {
+    state.data.cti = { dns_records: {}, whois: {}, enrichments: [] };
+  }
+
+  const safe_infra = ['namprd', 'outlook.com', 'schemas.microsoft.com', 'w3.org', 'protection.outlook.com', '.png', '.jpg', '.jpeg', '.gif', '.svg'];
+  const isSafe = (val) => typeof val === 'string' && safe_infra.some(s => val.toLowerCase().includes(s));
+  
+  const domains = [...new Set(iocList.filter(i => (i.type === 'domain' || i.type === 'domain_name') && !isSafe(i.value)).map(i => i.value))].slice(0, 5);
+  const ips = [...new Set(iocList.filter(i => (i.type === 'ip' || i.type === 'ipv4' || i.type === 'ipv6')).map(i => i.value))].slice(0, 3);
+  const urls = [...new Set(iocList.filter(i => i.type === 'url' && !isSafe(i.value)).map(i => i.value))].slice(0, 3);
+
+  if (domains.length === 0 && ips.length === 0 && urls.length === 0) return;
+
   state.isPollingCTI = true;
   renderCTI();
 
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('vt_api_key', vtKey);
-
-  try {
-    const response = await fetch('/api/analyze/cti', {
+  let vtPromise = Promise.resolve();
+  
+  // Fire FAST CTI (DNS/WHOIS)
+  if (domains.length > 0) {
+    fetch('/api/cti/fast', {
       method: 'POST',
-      body: formData
-    });
-    if (response.ok) {
-      const ctiData = await response.json();
-      if (state.data && ctiData.cti) {
-        state.data.cti = ctiData.cti;
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domains })
+    }).then(res => res.json()).then(fastData => {
+      if (state.data && state.data.cti) {
+        state.data.cti.dns_records = fastData.dns_records || {};
+        state.data.cti.whois = fastData.whois || {};
       }
-    } else {
-      console.warn("CTI fetch non-200 response");
-    }
-  } catch (e) {
-    console.error("CTI fetch error:", e);
-  } finally {
+      renderCTI(); // Update view with fast data immediately!
+    }).catch(e => console.error("Fast CTI fetch error:", e));
+  }
+
+  // Fire SLOW CTI (VirusTotal) completely concurrently
+  const vtKey = state.apiKeys?.vt;
+  if (vtKey) {
+    vtPromise = fetch('/api/cti/vt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ vt_api_key: vtKey, domains, ips, urls })
+    }).then(res => res.json()).then(slowData => {
+      if (state.data && state.data.cti) {
+        state.data.cti.enrichments = slowData.enrichments || [];
+      }
+    }).catch(e => console.error("Slow CTI fetch error:", e));
+  } else {
     state.isPollingCTI = false;
     renderCTI();
   }
+
+  await vtPromise;
+  state.isPollingCTI = false;
+  renderCTI();
 }
 
 function loadDemoData() {
@@ -698,6 +796,18 @@ function switchPanel(panelName) {
     item.classList.toggle('active', item.dataset.panel === panelName);
     item.setAttribute('aria-current', item.dataset.panel === panelName ? 'page' : 'false');
   });
+
+  // Populate DOCX summary when report-builder opens
+  if (panelName === 'report-builder') {
+    const summaryArea = document.getElementById('docx-ai-summary-panel');
+    const currentSummaryEl = document.querySelector('#ai-summary-content');
+    
+    // Auto-populate if it's empty or hasn't been modified yet, and AI summary exists
+    if (!summaryArea.dataset.edited && currentSummaryEl && currentSummaryEl.textContent && !currentSummaryEl.textContent.includes('Click "Generate Summary"')) {
+      summaryArea.value = currentSummaryEl.textContent.trim();
+      summaryArea.dataset.edited = "true"; // Mark as populated
+    }
+  }
 
   // Update panel elements
   document.querySelectorAll('.panel').forEach(panel => {
@@ -1060,13 +1170,13 @@ function renderHeaders() {
   `;
 }
 
-// Body rendering shifted to professional sandboxed implementation below
+// Body rendering shifted to professional sandboxed implementation
 
 function renderCTI() {
   const container = document.getElementById('cti-content');
   const data = state.data.cti;
 
-  if (state.isPollingCTI) {
+  if (!data && state.isPollingCTI) {
     container.innerHTML = `
       <div class="card" style="text-align: center; padding: var(--space-xl);">
         <div class="spinner" style="margin: 0 auto 15px; border-color: var(--primary); border-width: 3px; border-top-color: transparent; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
@@ -1093,17 +1203,44 @@ function renderCTI() {
 
   container.innerHTML = `
     <div class="card">
-      <h3>Enrichment Summary</h3>
-      <div style="display: flex; gap: var(--space-xl); margin-top: 10px;">
-        <div class="stat"><span class="value">${data.summary?.total_lookups || 0}</span><span class="label">Lookups</span></div>
-        <div class="stat"><span class="value">${data.summary?.cache_hits || 0}</span><span class="label">Cache Hits</span></div>
-        <div class="stat"><span class="value" style="color: var(--danger)">${data.summary?.malicious_count || 0}</span><span class="label">Malicious</span></div>
+      <h3>Context Details (DNS / WHOIS)</h3>
+      <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
+        ${Object.keys(whoisData).map(domain => {
+          const w = whoisData[domain];
+          const dns = dnsRecords[domain] || "No DNS Record";
+          if (w.error) return '<div class="detail-row"><strong>' + domain + '</strong>: Error ' + w.error + '</div>';
+          return `
+            <div class="detail-row" style="background: var(--bg-card); padding: 10px; border-radius: 4px; border: 1px solid var(--border-color);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <strong style="font-size: 1.1em; color: var(--primary);">${domain}</strong>
+                <span class="severity-badge ${w.assessment.includes('Suspicious') ? 'critical' : 'info'}">${w.assessment}</span>
+              </div>
+              <div style="font-size: 0.9em; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div><strong>DNS Resolution:</strong> <code>${escapeHtml(dns)}</code></div>
+                <div><strong>Registrar:</strong> ${escapeHtml(w.registrar)}</div>
+                <div><strong>Creation:</strong> ${escapeHtml(w.creation)}</div>
+              </div>
+              <details style="margin-top: 10px;">
+                <summary style="cursor: pointer; font-size: 0.8em; color: var(--text-secondary);">View Raw WHOIS</summary>
+                <pre style="font-size: 0.8em; max-height: 200px; overflow-y: auto; margin-top: 5px; padding: 10px; background: #1e1e1e; color: #d4d4d4; border-radius: 4px;">${escapeHtml(w.raw || '')}</pre>
+              </details>
+            </div>
+          `;
+        }).join('')}
+        ${Object.keys(whoisData).length === 0 && !state.isPollingCTI ? '<p class="text-muted">No external domains identified for WHOIS/DNS lookup.</p>' : ''}
+        ${Object.keys(whoisData).length === 0 && state.isPollingCTI ? '<div class="spinner" style="border-width: 2px; width: 20px; height: 20px; border-color: var(--primary); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 10px auto;"></div>' : ''}
       </div>
     </div>
     
     <div class="card" style="margin-top: var(--space-lg)">
-      <h3>Enriched Indicators</h3>
-      <div class="table-container">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>Third-Party Intelligence (VirusTotal)</h3>
+        ${state.isPollingCTI ? '<div class="spinner" style="border-width: 2px; border-color: var(--primary); border-top-color: transparent; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite;"></div>' : ''}
+      </div>
+      ${(!state.isPollingCTI && (!data.enrichments || data.enrichments.length === 0)) ? `
+        <p class="text-muted" style="margin-top:10px;">No VirusTotal enrichment data. (Check API keys or quota).</p>
+      ` : `
+      <div class="table-container" style="margin-top: 10px;">
         <table>
           <thead>
             <tr>
@@ -1125,45 +1262,7 @@ function renderCTI() {
           </tbody>
         </table>
       </div>
-    </div>
-
-    <div class="card" style="margin-top: var(--space-lg)">
-      <h3>Native Intelligence (DNS / WHOIS)</h3>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Domain</th>
-              <th>A Record (IPv4)</th>
-              <th>Registration Details</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${Object.keys(whoisData).length > 0 ? Object.keys(whoisData).map(domain => {
-    const dns = dnsRecords[domain] || 'N/A';
-    const w = whoisData[domain] || {};
-    const creation = w.creation || 'Unknown';
-    const registrar = w.registrar || 'Unknown';
-    const assessment = w.assessment || 'Neutral';
-
-    let badgeClass = 'badge ';
-    if (assessment.includes('Suspicious')) badgeClass += 'danger';
-    else if (assessment.includes('Legitimate')) badgeClass += 'success';
-    else badgeClass += 'warning';
-
-    return '<tr>' +
-      '<td><code>' + domain + '</code></td>' +
-      '<td><code>' + dns + '</code></td>' +
-      '<td>' +
-      '<div style="font-size: 0.85em; margin-bottom: 2px;">Created: <span class="highlight">' + creation + '</span></div>' +
-      '<div style="font-size: 0.85em; margin-bottom: 6px; color: var(--text-muted)">Registrar: ' + registrar + '</div>' +
-      '<span class="' + badgeClass + '" style="font-size: 0.75em; padding: 2px 6px;">' + assessment + '</span>' +
-      '</td>' +
-      '</tr>';
-  }).join('') : '<tr><td colspan="3" class="empty">No native intelligence gathered.</td></tr>'}
-          </tbody>
-        </table>
-      </div>
+      `}
     </div>
   `;
 }

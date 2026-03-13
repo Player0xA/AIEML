@@ -66,9 +66,17 @@ def extract_iocs_from_text(
     
     iocs = []
     
+    import tldextract
     # Extract domains
     for match in RE_DOMAIN.finditer(text):
         domain = match.group().lower()
+        
+        # Validate domain using Public Suffix List
+        ext = tldextract.extract(domain)
+        if not ext.suffix:
+            # Drop invalid TLDs (e.g. header.from, internal names)
+            continue
+            
         if domain not in seen:
             seen.add(domain)
             iocs.append(IOCEntry(
@@ -200,12 +208,19 @@ def extract_iocs_from_urls(urls: list[URLEntry]) -> list[IOCEntry]:
         
         # Extract domain from URL
         try:
+            import tldextract
             from urllib.parse import urlparse
             parsed = urlparse(url_entry.deobfuscated)
             if parsed.netloc:
                 domain = parsed.netloc.lower()
                 if ':' in domain:
                     domain = domain.split(':')[0]
+                    
+                # Validate domain using Public Suffix List
+                ext = tldextract.extract(domain)
+                if not ext.suffix:
+                    continue
+                    
                 if domain not in seen:
                     seen.add(domain)
                     iocs.append(IOCEntry(
