@@ -123,15 +123,19 @@ class RobustWhoisLookup:
         tld = extracted.suffix.lower().split('.')[-1] if extracted.suffix else None
 
         result = await self._try_rdap_servers(domain, tld)
-        if result and not result.error:
+        
+        if result and result.registrar != "Unknown" or result.creation_date != "Unknown":
+            result.raw = self._truncate_raw(result.raw, max_len=800)
             return result
 
         result = await self._try_whois_api(domain)
-        if result and not result.error:
+        if result and result.registrar != "Unknown" or result.creation_date != "Unknown":
+            result.raw = self._truncate_raw(result.raw, max_len=800)
             return result
 
         result = await self._try_web_scraping(domain)
-        if result and not result.error:
+        if result and result.registrar != "Unknown" or result.creation_date != "Unknown":
+            result.raw = self._truncate_raw(result.raw, max_len=800)
             return result
 
         return WhoisResult(
@@ -139,6 +143,14 @@ class RobustWhoisLookup:
             error="All lookup methods failed - network may be restricted",
             assessment="Unknown (Lookup Failed)"
         )
+
+    def _truncate_raw(self, raw: str, max_len: int = 800) -> str:
+        """Truncate raw output to prevent page bloat."""
+        if not raw:
+            return ""
+        if len(raw) <= max_len:
+            return raw
+        return raw[:max_len] + f"\n... (truncated, original length: {len(raw)} chars)"
 
     def _validate_domain(self, domain: str) -> dict:
         """Validate domain using tldextract for proper TLD handling."""
@@ -253,8 +265,6 @@ class RobustWhoisLookup:
             f"Registrar: {registrar}",
             f"Creation Date: {creation_date}",
             f"Name Server: {name_server}",
-            "",
-            "--- Additional Info ---",
         ]
         
         if data:
@@ -267,10 +277,6 @@ class RobustWhoisLookup:
             
             if data.get('ldhName'):
                 lines.append(f"LDH Name: {data.get('ldhName')}")
-            
-            lines.append("")
-            lines.append("--- Raw RDAP Data (truncated) ---")
-            lines.append(str(data)[:800])
         
         return '\n'.join(lines)
 
@@ -424,25 +430,14 @@ class RobustWhoisLookup:
             raw=raw_formatted
         )
 
-    def _format_whois_raw(self, domain: str, registrar: str, creation_date: str, name_server: str, raw_text: str) -> str:
+    def _format_whois_raw(self, domain: str, registrar: str, creation_date: str, name_server: str, raw_text: str = None) -> str:
         """Format raw WHOIS text to be more readable."""
         lines = [
             f"Domain: {domain}",
             f"Registrar: {registrar}",
             f"Creation Date: {creation_date}",
             f"Name Server: {name_server}",
-            "",
-            "--- Raw WHOIS (truncated) ---",
         ]
-        
-        text_lines = raw_text.split('\n')
-        important_lines = []
-        for line in text_lines[:50]:
-            line = line.strip()
-            if line and len(line) > 3 and not line.startswith('<'):
-                important_lines.append(line[:150])
-        
-        lines.extend(important_lines)
         return '\n'.join(lines)
 
 

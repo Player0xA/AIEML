@@ -533,6 +533,52 @@ function initializeEventListeners() {
     });
   }
   
+  // JSON Report Export
+  const btnGenJson = document.getElementById('btn-generate-json-report');
+  if (btnGenJson) {
+    btnGenJson.addEventListener('click', async () => {
+      if (!state.data || !state.data.artifacts) {
+        showToast('No analysis data available. Please analyze an email first.', 'error');
+        return;
+      }
+      
+      showToast('Generating JSON report...', 'info');
+      try {
+        const response = await fetch('/api/report/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            artifacts: state.data.artifacts,
+            case_id: '',
+            include_ai: true
+          })
+        });
+        
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.detail || 'Failed to generate report');
+        }
+        
+        const report = await response.json();
+        
+        // Download as JSON file
+        const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const filename = state.data.artifacts?.metadata?.input_filename || 'email';
+        a.download = `Report_${filename.replace(/[^a-z0-9]/gi, '_')}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        showToast('JSON report generated successfully', 'success');
+      } catch (err) {
+        showToast(`Report error: ${err.message}`, 'error');
+        console.error('JSON report failed:', err);
+      }
+    });
+  }
+  
   const btnCancelDocx = document.getElementById('btn-cancel-docx');
   if (btnCancelDocx) {
     btnCancelDocx.addEventListener('click', () => {

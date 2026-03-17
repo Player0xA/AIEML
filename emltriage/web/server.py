@@ -5,11 +5,15 @@ import json
 from pathlib import Path
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from emltriage.core.parser import parse_eml_file, create_iocs_json
 from emltriage.core.models import AnalysisMode
 from emltriage.cti import CTIEngine, CTIProviderType
 from emltriage.infra.robust_whois import RobustWhoisLookup, assess_domain
+from emltriage.reporting.schemas import InvestigationReport
+from emltriage.reporting.json_generator import generate_report_from_dict
+from emltriage.reporting.ai_narrative import AIRegenerator
 
 
 app = FastAPI(title="emltriage Backend")
@@ -356,6 +360,47 @@ async def summarize_eml(req: AISummaryRequest):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"AI Bridge Bridge Error: {str(e)}")
+
+
+# Report Generation Endpoint
+class ReportRequest(BaseModel):
+    artifacts: dict
+    case_id: str = ""
+    include_ai: bool = True
+
+
+@app.post("/api/report/generate")
+async def generate_investigation_report(req: ReportRequest):
+    """Generate investigation report JSON with optional AI narrative."""
+    try:
+        report = generate_report_from_dict(req.artifacts, case_id=req.case_id)
+        
+        if req.include_ai:
+            ai_gen = AIRegenerator()
+            if ai_gen.is_available():
+                ai_outputs = await ai_gen.generate_narrative(report)
+                report.ai_outputs = ai_outputs
+            else:
+                report.ai_outputs.ai_inputs = report.ai_inputs
+                report.ai_outputs.posible_impacto = "Ollama no disponible"
+        
+        return JSONResponse(content=report.model_dump(mode='json'))
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
+
+
+@app.get("/api/ai/status")
+async def ai_status():
+    """Check AI provider status."""
+    ai_gen = AIRegenerator()
+    return {
+        "available": ai_gen.is_available(),
+        "provider": "ollama",
+        "model": "llama3.1"
+    }
 
 
 # Mount at root
