@@ -124,17 +124,17 @@ class RobustWhoisLookup:
 
         result = await self._try_rdap_servers(domain, tld)
         
-        if result and result.registrar != "Unknown" or result.creation_date != "Unknown":
+        if result and (result.registrar != "Unknown" or result.creation_date != "Unknown"):
             result.raw = self._truncate_raw(result.raw, max_len=800)
             return result
 
         result = await self._try_whois_api(domain)
-        if result and result.registrar != "Unknown" or result.creation_date != "Unknown":
+        if result and (result.registrar != "Unknown" or result.creation_date != "Unknown"):
             result.raw = self._truncate_raw(result.raw, max_len=800)
             return result
 
         result = await self._try_web_scraping(domain)
-        if result and result.registrar != "Unknown" or result.creation_date != "Unknown":
+        if result and (result.registrar != "Unknown" or result.creation_date != "Unknown"):
             result.raw = self._truncate_raw(result.raw, max_len=800)
             return result
 
@@ -192,7 +192,7 @@ class RobustWhoisLookup:
                 if resp.status_code == 200:
                     data = resp.json()
                     result = self._parse_rdap_response(domain, data)
-                    if result.registrar != "Unknown" or result.creation_date != "Unknown":
+                    if result and (result.registrar != "Unknown" or result.creation_date != "Unknown"):
                         result.source = f"rdap ({url.split('/')[2]})"
                         return result
                 elif resp.status_code == 404:
@@ -319,7 +319,7 @@ class RobustWhoisLookup:
                         logger.debug(f"Web scraping {url} returned JavaScript, trying next")
                         continue
                     
-                    if result.registrar == "Unknown" and result.creation_date == "Unknown":
+                    if result and result.registrar == "Unknown" and result.creation_date == "Unknown":
                         logger.debug(f"Web scraping {url} returned no useful data, trying next")
                         continue
                     

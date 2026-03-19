@@ -3,6 +3,8 @@
  * Handles file loading, rendering, theme switching, and visual effects
  */
 
+console.log('[DEBUG] app.js loaded');
+
 // Demo Data for testing without files
 const DEMO_DATA = {
   artifacts: {
@@ -490,13 +492,76 @@ function initializeEventListeners() {
     });
   }
 
-  // DOCX export modal
-  const btnGenDocx = document.getElementById('btn-generate-docx');
+  // Build Draft Button
+  const btnPreviewDocx = document.getElementById('btn-preview-docx');
+  let currentLayer3RenderModel = null;
+  
+  if (btnPreviewDocx) {
+    console.log('[DEBUG] Build Draft button found, attaching handler');
+    btnPreviewDocx.addEventListener('click', async () => {
+      console.log('[DEBUG] Build Draft clicked!');
+      console.log('[DEBUG] state.data:', state.data);
+      console.log('[DEBUG] state.data.artifacts:', state.data?.artifacts);
+      
+      // First, fetch the built report layer 3 JSON
+      showToast('Rendering preview...', 'info');
+      try {
+        if (!state.data || !state.data.artifacts) {
+          throw new Error('No artifacts loaded. Please analyze an email first.');
+        }
+        
+        const response = await fetch('/api/report/preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+             artifacts: state.data.artifacts,
+             case_id: '',
+             include_ai: true
+          })
+        });
+        
+        console.log('[DEBUG] Response status:', response.status);
+        
+        if (!response.ok) {
+          const errText = await response.text();
+          console.error('[DEBUG] Response error:', errText);
+          throw new Error('Failed to generate preview: ' + response.status);
+        }
+        
+        const responseData = await response.json();
+        console.log('[DEBUG] Response data keys:', Object.keys(responseData));
+        
+        currentLayer3RenderModel = responseData;
+        
+        // Hide empty state and show container
+        document.getElementById('docx-empty-state').style.display = 'none';
+        const container = document.getElementById('docx-preview-container');
+        container.style.display = 'block';
+        
+        // Render!
+        renderLayer3ToHTML(currentLayer3RenderModel, container);
+        showToast('Preview loaded. You can now edit the text.', 'success');
+        
+      } catch (err) {
+         console.error('[DEBUG] Preview error:', err);
+         showToast(`Preview Error: ${err.message}`, 'error');
+      }
+    });
+  } else {
+    console.warn('[DEBUG] Build Draft button NOT FOUND - ID: btn-preview-docx');
+  }
+
+  // DOCX Export Modal / Direct Download
+  const btnGenDocx = document.getElementById('btn-generate-docx-panel');
   if (btnGenDocx) {
     btnGenDocx.addEventListener('click', async () => {
-      const summary = document.getElementById('docx-ai-summary').value;
-      const autoOpen = document.getElementById('docx-auto-open').checked;
-      document.getElementById('docx-export-modal').classList.add('hidden');
+      const summary = document.getElementById('docx-ai-summary-panel').value || '';
+      const autoOpen = document.getElementById('docx-auto-open-panel').checked;
+      
+      let layer3_modified = null;
+      if (currentLayer3RenderModel && document.getElementById('docx-preview-container').style.display !== 'none') {
+          layer3_modified = serializeDocxPreview(currentLayer3RenderModel);
+      }
       
       showToast('Generating DOCX report...', 'info');
       try {
@@ -506,7 +571,8 @@ function initializeEventListeners() {
           body: JSON.stringify({
             artifacts: state.data.artifacts,
             ai_summary: summary,
-            auto_open: autoOpen
+            auto_open: autoOpen,
+            layer3_json: layer3_modified
           })
         });
         
@@ -531,6 +597,192 @@ function initializeEventListeners() {
         console.error('Docx export failed:', err);
       }
     });
+  }
+
+  // Helper functions to render Layer 3 definitions directly into HTML
+  
+  function renderLayer3ToHTML(model, container) {
+      container.innerHTML = ''; // clear
+      
+      if (model.sections) {
+          model.sections.forEach((section, s_idx) => {
+              const secDiv = document.createElement('div');
+              secDiv.className = 'docx-section';
+              
+              if (section.title) {
+                  const h1 = document.createElement('h1');
+                  h1.innerText = section.title;
+                  h1.setAttribute('contenteditable', 'true');
+                  h1.dataset.path = `sections[${s_idx}].title`;
+                  secDiv.appendChild(h1);
+              }
+              
+              if (section.blocks) {
+                  section.blocks.forEach((block, b_idx) => {
+                      const blockPath = `sections[${s_idx}].blocks[${b_idx}]`;
+                      renderBlock(block, secDiv, blockPath);
+                  });
+              }
+              
+              container.appendChild(secDiv);
+          });
+      }
+  }
+  
+  function renderBlock(block, container, path) {
+      switch (block.type) {
+          case 'heading':
+              const hn = document.createElement(`h${block.level + 1}`); // level 2 = h3 in html typically, but let's use +1 for nesting visually
+              hn.innerText = block.text;
+              hn.setAttribute('contenteditable', 'true');
+              hn.dataset.path = `${path}.text`;
+              container.appendChild(hn);
+              break;
+          case 'paragraph':
+              const p = document.createElement('p');
+              p.innerText = block.text;
+              p.setAttribute('contenteditable', 'true');
+              p.dataset.path = `${path}.text`;
+              container.appendChild(p);
+              break;
+          case 'list':
+              const list = document.createElement(block.style === 'numbered' ? 'ol' : 'ul');
+              block.items.forEach((item, i) => {
+                  const li = document.createElement('li');
+                  li.innerText = item;
+                  li.setAttribute('contenteditable', 'true');
+                  li.dataset.path = `${path}.items[${i}]`;
+                  list.appendChild(li);
+              });
+              container.appendChild(list);
+              break;
+          case 'table':
+              const tableCont = document.createElement('div');
+              tableCont.className = 'table-container';
+              const table = document.createElement('table');
+              
+              if (block.caption) {
+                  const cap = document.createElement('caption');
+                  cap.innerText = block.caption;
+                  cap.className = 'caption';
+                  cap.setAttribute('contenteditable', 'true');
+                  cap.dataset.path = `${path}.caption`;
+                  table.appendChild(cap);
+              }
+              
+              if (block.layout === 'horizontal') {
+                  const thead = document.createElement('thead');
+                  const trHead = document.createElement('tr');
+                  block.columns.forEach((col, c) => {
+                      const th = document.createElement('th');
+                      th.innerText = col;
+                      th.setAttribute('contenteditable', 'true');
+                      th.dataset.path = `${path}.columns[${c}]`;
+                      trHead.appendChild(th);
+                  });
+                  thead.appendChild(trHead);
+                  table.appendChild(thead);
+                  
+                  const tbody = document.createElement('tbody');
+                  block.rows.forEach((row, ri) => {
+                      const tr = document.createElement('tr');
+                      if (Array.isArray(row)) {
+                          row.forEach((cell, ci) => {
+                              const td = document.createElement('td');
+                              td.innerText = cell;
+                              td.setAttribute('contenteditable', 'true');
+                              td.dataset.path = `${path}.rows[${ri}][${ci}]`;
+                              tr.appendChild(td);
+                          });
+                      } else {
+                          // Dict format row
+                          block.columns.forEach(col => {
+                              const td = document.createElement('td');
+                              td.innerText = row[col] || '';
+                              td.setAttribute('contenteditable', 'true');
+                              td.dataset.path = `${path}.rows[${ri}].${col}`;
+                              tr.appendChild(td);
+                          });
+                      }
+                      tbody.appendChild(tr);
+                  });
+                  table.appendChild(tbody);
+              } else if (block.layout === 'vertical') {
+                  table.className = "docx-vertical-table";
+                  const tbody = document.createElement('tbody');
+                  block.rows.forEach((row, ri) => {
+                      const tr = document.createElement('tr');
+                      // key
+                      const td1 = document.createElement('td');
+                      td1.innerText = row[0];
+                      td1.setAttribute('contenteditable', 'true');
+                      td1.dataset.path = `${path}.rows[${ri}][0]`;
+                      tr.appendChild(td1);
+                      // value
+                      const td2 = document.createElement('td');
+                      td2.innerText = row[1];
+                      td2.setAttribute('contenteditable', 'true');
+                      td2.dataset.path = `${path}.rows[${ri}][1]`;
+                      tr.appendChild(td2);
+                      tbody.appendChild(tr);
+                  });
+                  table.appendChild(tbody);
+              }
+              
+              tableCont.appendChild(table);
+              container.appendChild(tableCont);
+              break;
+          case 'image':
+              const imgWrap = document.createElement('div');
+              imgWrap.style.textAlign = 'center';
+              const img = document.createElement('img');
+              // Local paths won't route naturally to the browser without serving temp dir. 
+              // Usually images are injected by docx backend. We display a placeholder for preview.
+              img.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%23ccc' viewBox='0 0 24 24'%3E%3Cpath d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/%3E%3C/svg%3E";
+              imgWrap.appendChild(img);
+              if (block.caption) {
+                  const cap = document.createElement('div');
+                  cap.innerText = block.caption;
+                  cap.className = 'caption';
+                  cap.setAttribute('contenteditable', 'true');
+                  cap.dataset.path = `${path}.caption`;
+                  imgWrap.appendChild(cap);
+              }
+              container.appendChild(imgWrap);
+              break;
+          case 'page_break':
+              const pb = document.createElement('hr');
+              pb.className = 'page-break';
+              container.appendChild(pb);
+              break;
+      }
+  }
+  
+  function serializeDocxPreview(baseModel) {
+      // Create deep clone of the model
+      const _model = JSON.parse(JSON.stringify(baseModel));
+      const container = document.getElementById('docx-preview-container');
+      
+      const elements = container.querySelectorAll('[contenteditable="true"]');
+      elements.forEach(el => {
+          const path = el.dataset.path;
+          if (path) {
+              const newValue = el.innerText.trim();
+              setPath(_model, path, newValue);
+          }
+      });
+      return _model;
+  }
+  
+  function setPath(obj, path, value) {
+      // Simple path resolver for expressions like `sections[0].blocks[2].title`
+      const segments = path.replace(/\]/g, '').split(/\[|\./);
+      let current = obj;
+      for (let i = 0; i < segments.length - 1; i++) {
+          if (!current[segments[i]]) current[segments[i]] = {};
+          current = current[segments[i]];
+      }
+      current[segments[segments.length - 1]] = value;
   }
   
   // JSON Report Export
@@ -766,6 +1018,20 @@ async function fetchCTIAsync() {
       }
     }).catch(e => console.error("Slow CTI fetch error:", e));
   } else {
+    // Try URLhaus even without VT key - it's free and no API key needed
+    if (urls.length > 0 || domains.length > 0) {
+      fetch('/api/cti/urlhaus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ urls, domains })
+      }).then(res => res.json()).then(urlhausData => {
+        if (state.data && state.data.cti && urlhausData.enrichments) {
+          // Merge with existing enrichments
+          const existing = state.data.cti.enrichments || [];
+          state.data.cti.enrichments = [...existing, ...urlhausData.enrichments];
+        }
+      }).catch(e => console.error("URLhaus fetch error:", e));
+    }
     state.isPollingCTI = false;
     renderCTI();
   }
@@ -1280,28 +1546,37 @@ function renderCTI() {
     
     <div class="card" style="margin-top: var(--space-lg)">
       <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3>Third-Party Intelligence (VirusTotal)</h3>
+        <h3>Third-Party Intelligence (VT + URLhaus)</h3>
         ${state.isPollingCTI ? '<div class="spinner" style="border-width: 2px; border-color: var(--primary); border-top-color: transparent; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite;"></div>' : ''}
       </div>
       ${(!state.isPollingCTI && (!data.enrichments || data.enrichments.length === 0)) ? `
-        <p class="text-muted" style="margin-top:10px;">No VirusTotal enrichment data. (Check API keys or quota).</p>
+        <p class="text-muted" style="margin-top:10px;">No CTI enrichment data. Configure API keys or URLhaus will auto-check URLs/domains.</p>
       ` : `
-      <div class="table-container" style="margin-top: 10px;">
+      <div class="table-container" style="margin-top: 10px; overflow-x: auto;">
         <table>
           <thead>
             <tr>
               <th>IOC</th>
               <th>Provider</th>
               <th>Score</th>
+              <th>Tags/Categories</th>
+              <th>Last Seen</th>
             </tr>
           </thead>
           <tbody>
             ${(data.enrichments || []).map(e => `
               <tr>
-                <td><code>${e.ioc}</code></td>
-                <td>${e.provider}</td>
-                <td class="${e.malicious_score > 70 ? 'danger' : e.malicious_score > 30 ? 'warn' : 'good'}">
+                <td><code style="font-size: 0.85em; word-break: break-all;">${escapeHtml(e.ioc)}</code></td>
+                <td><span class="badge" style="background: ${e.provider === 'virustotal' ? '#5382e1' : e.provider === 'urlhaus' ? '#d63031' : 'var(--border)'}">${e.provider}</span></td>
+                <td class="${e.malicious_score > 70 ? 'danger' : e.malicious_score > 30 ? 'warn' : 'good'}" style="font-weight: bold;">
                   ${e.malicious_score || 0}
+                </td>
+                <td style="font-size: 0.8em; max-width: 200px;">
+                  ${(e.tags || []).slice(0, 3).map(t => `<span class="badge" style="margin: 2px; font-size: 0.75em;">${escapeHtml(t)}</span>`).join('')}
+                  ${(e.categories || []).slice(0, 2).map(c => `<span class="badge" style="margin: 2px; font-size: 0.75em; background: var(--border);">${escapeHtml(c)}</span>`).join('')}
+                </td>
+                <td style="font-size: 0.8em; color: var(--text-secondary);">
+                  ${e.last_seen ? new Date(e.last_seen).toLocaleDateString() : e.first_seen ? new Date(e.first_seen).toLocaleDateString() : '-'}
                 </td>
               </tr>
             `).join('')}

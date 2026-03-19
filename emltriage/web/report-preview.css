@@ -1,0 +1,144 @@
+/* DOCX Preview Styles */
+.docx-preview-container {
+    background-color: white;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 60px 40px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    color: black;
+    font-family: inherit; /* Calibi-like by default in tools unless set */
+    min-height: 1056px; /* A4 approx */
+}
+
+/* Make it look distinct from dark UI */
+[data-theme="dark"] .docx-preview-container {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.docx-section {
+    margin-bottom: 25px;
+}
+
+.docx-section h1 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 5px;
+}
+
+.docx-section h2 {
+    font-size: 1.25rem;
+    color: #34495e;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.docx-section h3 {
+    font-size: 1.1rem;
+    color: #34495e;
+    margin-top: 15px;
+    margin-bottom: 8px;
+}
+
+.docx-section p {
+    font-size: 11pt;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    text-align: justify;
+    padding: 2px 4px;
+}
+
+.docx-section ul, .docx-section ol {
+    margin-bottom: 12px;
+    padding-left: 20px;
+}
+
+.docx-section li {
+    font-size: 11pt;
+    line-height: 1.5;
+    margin-bottom: 6px;
+    padding: 2px 4px;
+}
+
+.docx-section .table-container {
+    margin: 15px 0;
+    overflow-x: auto;
+}
+
+.docx-section table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10pt;
+}
+
+.docx-section th {
+    background-color: #f2f2f2;
+    border: 1px solid #bdc3c7;
+    padding: 8px;
+    font-weight: bold;
+    color: #2c3e50; /* Ensure text is dark regardless of theme */
+}
+
+.docx-section td {
+    border: 1px solid #bdc3c7;
+    padding: 8px;
+    min-width: 50px;
+    color: black; /* Ensure text is dark regardless of theme */
+}
+
+.docx-section img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 15px auto;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+.docx-section .caption {
+    font-size: 9pt;
+    text-align: center;
+    color: #7f8c8d;
+    font-style: italic;
+    margin-top: -10px;
+    margin-bottom: 15px;
+}
+
+.page-break {
+    border: 0;
+    border-top: 2px dashed #bdc3c7;
+    margin: 40px 0;
+    position: relative;
+}
+
+.page-break::after {
+    content: "PAGE BREAK";
+    position: absolute;
+    top: -10px;
+    right: 0;
+    background: #ecf0f1;
+    color: #7f8c8d;
+    padding: 2px 8px;
+    font-size: 10px;
+    border-radius: 4px;
+}
+
+/* Content Editable visual hints */
+[contenteditable="true"]:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+    outline: 1px dashed #3498db;
+    cursor: text;
+}
+
+[contenteditable="true"]:focus {
+    background-color: rgba(52, 152, 219, 0.05);
+    outline: 2px solid #3498db;
+}
+
+/* Specific styling for vertical tables (e.g. metadata) */
+.docx-vertical-table td:first-child {
+    font-weight: bold;
+    background-color: #f9f9f9;
+    width: 30%;
+}

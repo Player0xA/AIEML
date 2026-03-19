@@ -115,6 +115,17 @@ async def analyze_cti_fast(req: CTIFastRequest):
                 async with RobustWhoisLookup(timeout=5.0) as lookup:
                     result = await lookup.lookup(domain)
                     
+                    # Handle case where WHOIS lookup returns None
+                    if result is None:
+                        return domain, {
+                            "error": "WHOIS lookup failed - domain not found in RDAP",
+                            "registrar": "Unknown",
+                            "creation": "Unknown",
+                            "assessment": "Unknown",
+                            "raw": "",
+                            "source": "rdap"
+                        }
+                    
                     if result.error:
                         return domain, {
                             "error": result.error,
@@ -206,6 +217,97 @@ async def analyze_cti_vt(req: CTIVTRequest):
         raise HTTPException(status_code=500, detail=f"VT CTI failed: {str(e)}")
 
 
+class CTIURLhausRequest(BaseModel):
+    urls: list[str]
+    domains: list[str]
+
+
+@app.post("/api/cti/urlhaus")
+async def analyze_cti_urlhaus(req: CTIURLhausRequest):
+    """URLhaus API for malicious URL checking - no API key needed."""
+    try:
+        import requests
+        
+        all_enrichments = []
+        
+        for url in req.urls:
+            try:
+                response = requests.get(
+                    f"https://urlhaus-api.abuse.ch/v1/host/{url}",
+                    timeout=10
+                )
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get("query_status") == "ok":
+                        host = data.get("host", url)
+                        urlhaus_reference = data.get("urlhaus_reference", "")
+                        threat = data.get("threat", "")
+                        url_status = data.get("url_status", "")
+                        date_added = data.get("dateadded", "")
+                        
+                        malicious_score = 100 if url_status in ["online", "offline"] and threat else 0
+                        
+                        all_enrichments.append({
+                            "ioc": host,
+                            "provider": "urlhaus",
+                            "malicious_score": malicious_score,
+                            "tags": [threat] if threat else [],
+                            "categories": [url_status],
+                            "first_seen": date_added,
+                            "last_seen": date_added,
+                            "raw_data": {
+                                "threat": threat,
+                                "url_status": url_status,
+                                "urlhaus_reference": urlhaus_reference,
+                                "original_url": url
+                            }
+                        })
+            except Exception as e:
+                print(f"WARN: URLhaus lookup failed for {url}: {e}")
+                continue
+        
+        for domain in req.domains:
+            try:
+                response = requests.get(
+                    f"https://urlhaus-api.abuse.ch/v1/host/{domain}",
+                    timeout=10
+                )
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get("query_status") == "ok":
+                        host = data.get("host", domain)
+                        urlhaus_reference = data.get("urlhaus_reference", "")
+                        threat = data.get("threat", "")
+                        url_status = data.get("url_status", "")
+                        date_added = data.get("dateadded", "")
+                        
+                        malicious_score = 100 if url_status in ["online", "offline"] and threat else 0
+                        
+                        all_enrichments.append({
+                            "ioc": host,
+                            "provider": "urlhaus",
+                            "malicious_score": malicious_score,
+                            "tags": [threat] if threat else [],
+                            "categories": [url_status],
+                            "first_seen": date_added,
+                            "last_seen": date_added,
+                            "raw_data": {
+                                "threat": threat,
+                                "url_status": url_status,
+                                "urlhaus_reference": urlhaus_reference
+                            }
+                        })
+            except Exception as e:
+                print(f"WARN: URLhaus lookup failed for {domain}: {e}")
+                continue
+        
+        return JSONResponse(content={"enrichments": all_enrichments})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"URLhaus CTI failed: {str(e)}")
+
+
 from pydantic import BaseModel
 
 class AISummaryRequest(BaseModel):
@@ -216,15 +318,17 @@ class AISummaryRequest(BaseModel):
     length: str = 'medium'
 
 class DocxExportRequest(BaseModel):
-    artifacts: dict
-    ai_summary: str = None
+    layer3_json: dict = None
+    artifacts: dict = None  # Legacy fallback
+    ai_summary: str = None  # Legacy fallback
     auto_open: bool = False
 
 @app.post("/api/export/docx")
 async def export_docx(req: DocxExportRequest):
     try:
         from emltriage.core.models import Artifacts
-        from emltriage.reporting.docx import generate_docx_report
+        from emltriage.reporting.docx.renderer import render_docx
+        from emltriage.reporting.docx.models import RenderModel
         import typing
         from fastapi.responses import FileResponse
         import uuid
@@ -232,18 +336,25 @@ async def export_docx(req: DocxExportRequest):
         import sys
         import subprocess
 
-        artifacts = Artifacts.model_validate(req.artifacts)
-        
         # Save to a dedicated output folder (or temp)
         case_dir = Path.home() / "emltriage_cases"
         case_dir.mkdir(parents=True, exist_ok=True)
         
-        run_id = artifacts.metadata.run_id or str(uuid.uuid4())
-        filename = artifacts.metadata.input_filename or "email"
+        run_id = str(uuid.uuid4())
+        filename = "email_report"
         
         out_path = case_dir / f"Report_{filename}_{run_id}.docx"
-        generate_docx_report(artifacts, out_path, req.ai_summary)
         
+        if req.layer3_json:
+            # We have an already built (and potentially edited) RenderModel
+            render_model = RenderModel(**req.layer3_json)
+            render_docx(render_model, str(out_path))
+        else:
+            # Fallback legacy behavior if needed
+            from emltriage.reporting.docx import generate_docx_report
+            artifacts = Artifacts.model_validate(req.artifacts)
+            generate_docx_report(artifacts, out_path, req.ai_summary)
+
         if req.auto_open:
             if sys.platform == "darwin":
                 subprocess.call(["open", str(out_path)])
@@ -262,6 +373,49 @@ async def export_docx(req: DocxExportRequest):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+
+# Report Generation Endpoint Models
+class ReportRequest(BaseModel):
+    artifacts: dict
+    case_id: str = ""
+    include_ai: bool = True
+
+@app.post("/api/report/preview")
+async def get_report_preview(req: ReportRequest):
+    """Generates the Layer 3 RenderModel JSON for frontend rendering without downloading."""
+    try:
+        from emltriage.reporting.docx.transformers import transform_analysis_to_report_data, transform_report_data_to_render_model
+        from emltriage.reporting.docx.models import AnalysisModel
+        
+        report_data = generate_report_from_dict(req.artifacts, case_id=req.case_id)
+        
+        ai_outputs_dict = {}
+        if req.include_ai:
+            ai_gen = AIRegenerator()
+            if ai_gen.is_available():
+                ai_outputs = await ai_gen.generate_narrative(report_data)
+                ai_outputs_dict = ai_outputs.model_dump(mode='json') if hasattr(ai_outputs, 'model_dump') else dict(ai_outputs)
+        
+        # We need an AnalysisModel out of the generated report or raw artifacts
+        from emltriage.reporting.schemas import InvestigationReport
+        if isinstance(report_data, InvestigationReport):
+            # Hackish conversion of InvestigationReport -> AnalysisModel for now
+            # In a clean architecture, these would be the same model or map cleanly.
+            analysis_dict = report_data.model_dump(mode='json')
+            analysis_model = AnalysisModel(**analysis_dict)
+            
+            # Map L1 -> L2
+            l2_model = transform_analysis_to_report_data(analysis_model, ai_outputs_dict)
+            # Map L2 -> L3
+            render_model = transform_report_data_to_render_model(l2_model)
+            
+            return JSONResponse(content=render_model.model_dump(mode='json'))
+        
+        raise HTTPException(status_code=500, detail="Could not resolve AnalysisModel from report data")
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Preview generation failed: {str(e)}")
 
 @app.post("/api/ai/summarize")
 async def summarize_eml(req: AISummaryRequest):
@@ -360,13 +514,6 @@ async def summarize_eml(req: AISummaryRequest):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"AI Bridge Bridge Error: {str(e)}")
-
-
-# Report Generation Endpoint
-class ReportRequest(BaseModel):
-    artifacts: dict
-    case_id: str = ""
-    include_ai: bool = True
 
 
 @app.post("/api/report/generate")
